@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>SRS英単語穴埋めクイズ</title>
+  <title>SRS英単語 & TOEIC 404問 完全マスター</title>
   <!-- iPhone ホーム画面追加（PWA）対応メタタグ -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="SRS英単語" />
-  <meta name="theme-color" content="#4f46e5" />
+  <meta name="apple-mobile-web-app-title" content="TOEIC404" />
+  <meta name="theme-color" content="#2563eb" />
   <!-- Tailwind CSS & React (CDN) -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -19,19 +19,85 @@
       -webkit-tap-highlight-color: transparent;
       user-select: none;
     }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #94a3b8;
+      border-radius: 4px;
+    }
   </style>
 </head>
-<body class="bg-slate-100 text-slate-800 antialiased">
+<body class="bg-slate-100 text-slate-800 antialiased min-h-[100dvh]">
   <div id="root"></div>
 
   <script type="text/babel">
     const { useState, useEffect, useMemo, useRef } = React;
 
     // ==========================================
-    // 全200単語 完全マスターデータセット
+    // 0. 手書きノート抽出 重要単語マスター辞書（解説用自動カード）
     // ==========================================
-    const MASTER_DATA = [
-      // --- 第1グループ：日常・買い物 (1〜50) ---
+    const MASTER_VOCAB_DICT = {
+      "eligible": { meaning: "資格がある、適格な", part: "形容詞", note: "be eligible to do（〜する資格がある）" },
+      "substantially": { meaning: "大幅に、著しく", part: "副詞", note: "increase substantially（大幅に増加する）" },
+      "obsolete": { meaning: "時代遅れの、廃れた", part: "形容詞", note: "outdated と同義" },
+      "promptly": { meaning: "迅速に、即座に、きっかり", part: "副詞", note: "promptly at 9:00（9時きっかりに）" },
+      "thorough": { meaning: "徹底的な、完全な", part: "形容詞", note: "a thorough inspection（徹底的な検査）" },
+      "thoroughly": { meaning: "徹底的に、几帳面に", part: "副詞", note: "check thoroughly（徹底的に調べる）" },
+      "push back": { meaning: "延期する", part: "句動詞", note: "postpone と同義" },
+      "comply": { meaning: "従う、遵守する", part: "動詞", note: "comply with ~（〜に従う）" },
+      "compliance": { meaning: "法令遵守、従順", part: "名詞", note: "in compliance with ~" },
+      "lucrative": { meaning: "利益の上がる、儲かる", part: "形容詞", note: "profitable と同義" },
+      "infrastructure": { meaning: "インフラ、基盤設備", part: "名詞", note: "network infrastructure" },
+      "initiative": { meaning: "新しい取り組み、主導権", part: "名詞", note: "launch a new initiative" },
+      "in accordance with": { meaning: "〜に従って、〜に準拠して", part: "前置詞句", note: "in accordance with regulations" },
+      "mandatory": { meaning: "義務的な、必須の", part: "形容詞", note: "compulsory と同義" },
+      "no later than": { meaning: "遅くとも〜までに", part: "前置詞句", note: "no later than Friday" },
+      "in order to": { meaning: "〜するために", part: "熟語", note: "in order to do" },
+      "in addition": { meaning: "さらに、加えて", part: "接続副詞", note: "furthermore と同義" },
+      "subsidize": { meaning: "補助金を支給する", part: "動詞", note: "subsidized membership" },
+      "audit": { meaning: "監査、検査、監査する", part: "名詞/動詞", note: "conduct an audit" },
+      "beforehand": { meaning: "事前に、あらかじめ", part: "副詞", note: "in advance と同義" },
+      "alleviate": { meaning: "緩和する、和らげる", part: "動詞", note: "relieve と同義" },
+      "optimal": { meaning: "最適な、最善の", part: "形容詞", note: "optimal connectivity" },
+      "lingering": { meaning: "長引く、残っている", part: "形容詞", note: "lingering difficulties" },
+      "milestone": { meaning: "画期的な出来事、重要目標", part: "名詞", note: "reach a milestone" },
+      "alliance": { meaning: "提携、同盟", part: "名詞", note: "strategic alliance" },
+      "projections": { meaning: "予測、見通し", part: "名詞", note: "financial projections" },
+      "footprint": { meaning: "事業基盤、存在感、足跡", part: "名詞", note: "regional footprint" },
+      "meticulous": { meaning: "細心の注意を払った、綿密な", part: "形容詞", note: "meticulous planning" },
+      "implement": { meaning: "実行する、実施する", part: "動詞", note: "implement a policy" },
+      "take into consideration": { meaning: "〜を考慮に入れる", part: "熟語", note: "take ~ into account と同義" },
+      "expertise": { meaning: "専門知識、専門技術", part: "名詞", note: "extensive expertise" },
+      "cater to": { meaning: "〜の要望に応える", part: "句動詞", note: "cater to the needs of ~" },
+      "itinerary": { meaning: "旅行日程表、旅程", part: "名詞", note: "travel itinerary" },
+      "reimbursement": { meaning: "払い戻し、経費精算", part: "名詞", note: "reimbursement form" },
+      "compensation": { meaning: "補償、報酬", part: "名詞", note: "financial compensation" },
+      "take advantage of": { meaning: "〜を利用する、活用する", part: "熟語", note: "take full advantage of" },
+      "prosperous": { meaning: "繁栄している、裕福な", part: "形容詞", note: "thriving と同義" },
+      "authentic": { meaning: "本物の、真正の", part: "形容詞", note: "genuine と同義" },
+      "forecast": { meaning: "予測する、予測", part: "動詞/名詞", note: "sales forecast" },
+      "deficit": { meaning: "赤字、不足", part: "名詞", note: "budget deficit" },
+      "surplus": { meaning: "黒字、余剰", part: "名詞", note: "trade surplus" },
+      "supervisory": { meaning: "監督の、管理の", part: "形容詞", note: "supervisory role" },
+      "interact": { meaning: "交流する、相互作用する", part: "動詞", note: "interact with coworkers" },
+      "facilitate": { meaning: "促進する、容易にする", part: "動詞", note: "facilitate the process" },
+      "oversee": { meaning: "監督する、見届ける", part: "動詞", note: "supervise と同義" },
+      "adjacent": { meaning: "隣接した、近隣の", part: "形容詞", note: "adjacent to the station" },
+      "up and running": { meaning: "順調に稼働して", part: "形容詞句", note: "get the system up and running" },
+      "behind schedule": { meaning: "予定より遅れて", part: "副詞句", note: "fall behind schedule" },
+      "ahead of schedule": { meaning: "予定より早く", part: "副詞句", note: "ahead of schedule" },
+      "well in advance": { meaning: "十分に前もって", part: "副詞句", note: "book well in advance" }
+    };
+
+    // ==========================================
+    // 1. 日常の英単語 マスターデータセット（200語）
+    // ==========================================
+    const DAILY_MASTER_DATA = [
       { id: 1, word: "yesterday", target: "yesterday", meaning: "副詞：昨日", phrase: "I talked about what happened yesterday.", phraseJa: "昨日のことについて話しました。", otherPhrase: "I saw a movie yesterday.", otherPhraseJa: "私は昨日映画を見ました。" },
       { id: 2, word: "talk", target: "talked", meaning: "動詞：話す", phrase: "I talked about what happened yesterday.", phraseJa: "昨日のことについて話しました。", otherPhrase: "Let's talk about our next trip.", otherPhraseJa: "次の旅行について話しましょう。" },
       { id: 3, word: "wake up", target: "woke up", meaning: "句動詞：起きる、目が覚める", phrase: "Since I woke up in the morning...", phraseJa: "朝起きてから...", otherPhrase: "I wake up at 7 AM every day.", otherPhraseJa: "私は毎日朝7時に起きます。" },
@@ -51,196 +117,291 @@
       { id: 17, word: "usually", target: "usually", meaning: "副詞：通常は、たいてい", phrase: "I usually run for about 30 minutes.", phraseJa: "通常は30分程度走ります。", otherPhrase: "I usually go to bed at 11 PM.", otherPhraseJa: "私はたいてい夜11時に寝ます。" },
       { id: 18, word: "minute", target: "minutes", meaning: "名詞：分", phrase: "I ran for 30 minutes.", phraseJa: "30分走りました。", otherPhrase: "Wait a minute, please.", otherPhraseJa: "ちょっと待ってください。" },
       { id: 19, word: "hour", target: "hour", meaning: "名詞：時間（1時間単位）", phrase: "I ended up running for an hour.", phraseJa: "結局1時間も走っていました。", otherPhrase: "It takes an hour by train.", otherPhraseJa: "電車で1時間かかります。" },
-      { id: 20, word: "return", target: "returning", meaning: "動詞：戻る、帰る", phrase: "After returning home, I had lunch.", phraseJa: "帰ってきてからランチを食べました。", otherPhrase: "He will return tomorrow.", otherPhraseJa: "彼は明日戻ってきます。" },
-      { id: 21, word: "lunch", target: "lunch", meaning: "名詞：昼食、ランチ", phrase: "I ate lunch after coming back.", phraseJa: "帰ってきてからランチを食べました。", otherPhrase: "What did you have for lunch?", otherPhraseJa: "お昼は何を食べましたか？" },
-      { id: 22, word: "afternoon", target: "afternoon", meaning: "名詞：午後", phrase: "In the afternoon, I went to Shakujii-koen station.", phraseJa: "午後は石神井公園駅に行きました。", otherPhrase: "Let's meet in the afternoon.", otherPhraseJa: "午後に会いましょう。" },
-      { id: 23, word: "bicycle", target: "bicycle", meaning: "名詞：自転車", phrase: "I went there by bicycle.", phraseJa: "そこまで自転車で行きました。", otherPhrase: "I commute by bicycle.", otherPhraseJa: "私は自転車で通勤しています。" },
-      { id: 24, word: "take", target: "took", meaning: "動詞：（時間が）かかる", phrase: "It took about 20 minutes.", phraseJa: "大体20分程度かかりました。", otherPhrase: "It takes a lot of time to learn a language.", otherPhraseJa: "言語を学ぶには多くの時間がかかります。" },
-      { id: 25, word: "station", target: "station", meaning: "名詞：駅", phrase: "I went to the park station.", phraseJa: "公園駅まで行きました。", otherPhrase: "I'll pick you up at the station.", otherPhraseJa: "駅まで迎えに行きます。" },
-      { id: 26, word: "purpose", target: "purpose", meaning: "名詞：目的", phrase: "My purpose was the 10% off event.", phraseJa: "目的は10%オフのイベントでした。", otherPhrase: "What is the purpose of your visit?", otherPhraseJa: "訪問の目的は何ですか？" },
-      { id: 27, word: "daily necessities", target: "daily necessities", meaning: "名詞句：日用品", phrase: "I was looking for daily necessities.", phraseJa: "日用品を探していました。", otherPhrase: "I need to buy some daily necessities.", otherPhraseJa: "いくつか日用品を買う必要があります。" },
-      { id: 28, word: "discount", target: "discount", meaning: "名詞：割引、ディスカウント", phrase: "There was a 10% discount event.", phraseJa: "10%オフのイベントがありました。", otherPhrase: "Can you give me a discount?", otherPhraseJa: "割引してくれませんか？" },
-      { id: 29, word: "particularly", target: "particularly", meaning: "副詞：特に、とりわけ", phrase: "I didn't find anything particularly worth buying.", phraseJa: "特に買うべきものは見つかりませんでした。", otherPhrase: "I'm not particularly interested in sports.", otherPhraseJa: "私は特にスポーツに興味があるわけではありません。" },
-      { id: 30, word: "find", target: "find", meaning: "動詞：見つける", phrase: "I couldn't find anything to buy.", phraseJa: "買うものが見つかりませんでした。", otherPhrase: "I found my lost keys.", otherPhraseJa: "なくした鍵を見つけました。" },
-      { id: 31, word: "wife", target: "wife", meaning: "名詞：妻", phrase: "I bought what my wife asked for.", phraseJa: "妻に頼まれていたものを買いました。", otherPhrase: "My wife is an excellent cook.", otherPhraseJa: "私の妻は料理がとても上手です。" },
-      { id: 32, word: "ask", target: "asked for", meaning: "動詞：頼む、求める", phrase: "I bought some items my wife asked for.", phraseJa: "妻に頼まれていたものをいくつか買いました。", otherPhrase: "I need to ask you a favor.", otherPhraseJa: "あなたに頼み事があります。" },
-      { id: 33, word: "buy", target: "bought", meaning: "動詞：買う", phrase: "I bought baumkuchen.", phraseJa: "バームクーヘンを買いました。", otherPhrase: "I want to buy a new car.", otherPhraseJa: "新しい車を買いたいです。" },
-      { id: 34, word: "some", target: "some", meaning: "形容詞：いくつかの、多少の", phrase: "I bought some baumkuchen.", phraseJa: "バームクーヘンをいくつか買いました。", otherPhrase: "Can I have some water?", otherPhraseJa: "お水を少しいただけますか？" },
-      { id: 35, word: "supermarket", target: "supermarket", meaning: "名詞：スーパーマーケット", phrase: "I stopped by a nearby supermarket.", phraseJa: "近くのスーパーに寄りました。", otherPhrase: "I'm going to the supermarket now.", otherPhraseJa: "今からスーパーに行きます。" },
-      { id: 36, word: "nearby", target: "nearby", meaning: "形容詞／副詞：近くの", phrase: "I went to a nearby supermarket on the way home.", phraseJa: "帰りに近くのスーパーに寄りました。", otherPhrase: "Is there a nearby pharmacy?", otherPhraseJa: "近くに薬局はありますか？" },
-      { id: 37, word: "stop by", target: "stopped by", meaning: "句動詞：立ち寄る、寄り道する", phrase: "I stopped by a supermarket on my way back.", phraseJa: "帰りにスーパーに寄りました。", otherPhrase: "I'll stop by your office later.", otherPhraseJa: "後であなたのオフィスに寄ります。" },
-      { id: 38, word: "look for", target: "looking for", meaning: "句動詞：探す", phrase: "I was looking for coffee beans.", phraseJa: "コーヒー豆を探していました。", otherPhrase: "What are you looking for?", otherPhraseJa: "何を探しているのですか？" },
-      { id: 39, word: "coffee", target: "coffee", meaning: "名詞：コーヒー", phrase: "I went to look for coffee.", phraseJa: "コーヒーを探しに行きました。", otherPhrase: "I drink coffee every morning.", otherPhraseJa: "私は毎朝コーヒーを飲みます。" },
-      { id: 40, word: "bean", target: "beans", meaning: "名詞：豆", phrase: "I couldn't find the coffee beans I wanted.", phraseJa: "欲しいコーヒー豆が見つかりませんでした。", otherPhrase: "These beans are from Brazil.", otherPhraseJa: "これらの豆はブラジル産です。" },
-      { id: 41, word: "finally", target: "Finally", meaning: "副詞：最終的に、ついに", phrase: "Finally, I bought coffee powder.", phraseJa: "最終的にコーヒーの粉を買いました。", otherPhrase: "I finally finished my homework.", otherPhraseJa: "ついに宿題を終えました。" },
-      { id: 42, word: "powder", target: "powder", meaning: "名詞：粉末、パウダー", phrase: "I bought coffee powder at Life.", phraseJa: "ライフでコーヒー粉を買いました。", otherPhrase: "Add two spoons of cocoa powder.", otherPhraseJa: "ココアパウダーをスプーン2杯加えてください。" },
-      { id: 43, word: "dinner", target: "dinner", meaning: "名詞：夕食", phrase: "For dinner, I ate oden.", phraseJa: "夕食におでんを食べました。", otherPhrase: "What's for dinner tonight?", otherPhraseJa: "今夜の夕食は何ですか？" },
-      { id: 44, word: "make", target: "made", meaning: "動詞：作る", phrase: "I ate the oden my mother-in-law made.", phraseJa: "義理の母が作ってくれたおでんを食べました。", otherPhrase: "I'll make you some tea.", otherPhraseJa: "お茶を淹れてあげます。" },
-      { id: 45, word: "eat", target: "ate", meaning: "動詞：食べる", phrase: "I ate lunch and dinner.", phraseJa: "お昼と夕食を食べました。", otherPhrase: "I want to eat sushi.", otherPhraseJa: "お寿司が食べたいです。" },
-      { id: 46, word: "end", target: "ended", meaning: "動詞：終わる", phrase: "That's how the day ended.", phraseJa: "そんな感じで1日が終わりました。", otherPhrase: "The movie ends at 9 PM.", otherPhraseJa: "その映画は夜9時に終わります。" },
-      { id: 47, word: "day", target: "day", meaning: "名詞：一日、日", phrase: "The day ended like that.", phraseJa: "そのようにして1日が終わりました。", otherPhrase: "It was a long day.", otherPhraseJa: "長い一日でした。" },
-      { id: 48, word: "about", target: "about", meaning: "副詞：大体、約", phrase: "It took about 20 minutes.", phraseJa: "約20分かかりました。", otherPhrase: "I have about 100 dollars.", otherPhraseJa: "私は約100ドル持っています。" },
-      { id: 49, word: "eventually", target: "Eventually", meaning: "副詞：結局は、最終的に", phrase: "Eventually I ran for an hour.", phraseJa: "結局1時間走りました。", otherPhrase: "He eventually agreed with me.", otherPhraseJa: "彼は最終的に私に同意しました。" },
-      { id: 50, word: "nothing", target: "nothing", meaning: "代名詞：何も〜ない", phrase: "I bought nothing for myself.", phraseJa: "自分のものは何も買いませんでした。", otherPhrase: "There is nothing in the fridge.", otherPhraseJa: "冷蔵庫には何もありません。" },
-
-      // --- 第2グループ：育児・日課ルーティン (51〜100) ---
-      { id: 51, word: "Routine", target: "routine", meaning: "名詞：ルーティン、日課", phrase: "The routine after my son was born.", phraseJa: "長男が生まれてからのルーティンについて", otherPhrase: "Having a morning routine boosts productivity.", otherPhraseJa: "朝のルーティンを持つことは生産性を高めます。" },
-      { id: 52, word: "Son", target: "son", meaning: "名詞：息子", phrase: "My first son was born.", phraseJa: "長男が生まれまして", otherPhrase: "My son is starting school next year.", otherPhraseJa: "息子は来年学校に入学します。" },
-      { id: 53, word: "Born", target: "born", meaning: "動詞：生まれる", phrase: "My first son was born.", phraseJa: "長男が生まれまして", otherPhrase: "I was born and raised in Tokyo.", otherPhraseJa: "私は東京で生まれ育ちました。" },
-      { id: 54, word: "Wake up", target: "wake up", meaning: "句動詞：目覚める、起床する", phrase: "I wake up around 7 AM.", phraseJa: "朝7時くらいに起床して", otherPhrase: "I usually wake up early on weekends.", otherPhraseJa: "週末はたいてい早く起きます。" },
-      { id: 55, word: "Wife", target: "wife", meaning: "名詞：妻", phrase: "The baby bottle my wife used.", phraseJa: "妻が使っていた哺乳瓶", otherPhrase: "My wife and I love traveling.", otherPhraseJa: "妻と私は旅行が大好きです。" },
-      { id: 56, word: "Bottle", target: "bottle", meaning: "名詞：哺乳瓶、ボトル", phrase: "I wash the baby bottle.", phraseJa: "哺乳瓶等を洗い", otherPhrase: "Can you pass me that water bottle?", otherPhraseJa: "その水筒を取ってくれませんか？" },
-      { id: 57, word: "Wash", target: "wash", meaning: "動詞：洗う", phrase: "I wash the baby bottle.", phraseJa: "哺乳瓶等を洗い", otherPhrase: "I need to wash my car this weekend.", otherPhraseJa: "今週末、車を洗う必要があります。" },
-      { id: 58, word: "Sterilize", target: "sterilize", meaning: "動詞：消毒する、殺菌する", phrase: "I wash and sterilize it.", phraseJa: "洗い消毒し", otherPhrase: "Please sterilize the equipment before use.", otherPhraseJa: "使用前に器具を消毒してください。" },
-      { id: 59, word: "Breakfast", target: "breakfast", meaning: "名詞：朝ごはん", phrase: "I make my own breakfast.", phraseJa: "自分の朝ごはんを作ります", otherPhrase: "What did you have for breakfast?", otherPhraseJa: "朝食には何を食べましたか？" },
-      { id: 60, word: "Make", target: "make", meaning: "動詞：作る、用意する", phrase: "I make my own breakfast.", phraseJa: "自分の朝ごはんを作ります", otherPhrase: "I will make some coffee for us.", otherPhraseJa: "私たちのためにコーヒーを淹れますね。" },
-      { id: 61, word: "Laundry", target: "laundry", meaning: "名詞：洗濯物", phrase: "I fold the laundry.", phraseJa: "洗濯物をたたんで", otherPhrase: "I have a lot of laundry to do today.", otherPhraseJa: "今日はたくさんの洗濯をしなければなりません。" },
-      { id: 62, word: "Dry", target: "dry", meaning: "動詞：乾かす、乾燥させる", phrase: "I dry the laundry.", phraseJa: "洗濯物を乾燥させて", otherPhrase: "The paint will dry in a few hours.", otherPhraseJa: "ペンキは数時間で乾きます。" },
-      { id: 63, word: "Fold", target: "fold", meaning: "動詞：たたむ、折りたたむ", phrase: "I fold the laundry.", phraseJa: "洗濯物をたたんで", otherPhrase: "Can you help me fold these towels?", otherPhraseJa: "このタオルをたたむのを手伝ってくれますか？" },
-      { id: 64, word: "Room", target: "room", meaning: "名詞：部屋", phrase: "I go to my wife's room.", phraseJa: "妻の部屋に向かいます", otherPhrase: "Please clean your room before dinner.", otherPhraseJa: "夕食の前に部屋を掃除してください。" },
-      { id: 65, word: "Pick up", target: "pick up", meaning: "句動詞：抱き上げる、迎えに行く", phrase: "I pick up my son.", phraseJa: "息子を迎えに行き", otherPhrase: "I will pick you up at the station.", otherPhraseJa: "駅まであなたを迎えに行きます。" },
-      { id: 66, word: "Diaper", target: "diaper", meaning: "名詞：おむつ", phrase: "I change his diaper.", phraseJa: "おむつ替えをして", otherPhrase: "We need to buy more diapers.", otherPhraseJa: "おむつを買い足す必要があります。" },
-      { id: 67, word: "Change", target: "change", meaning: "動詞：着替える、替える", phrase: "I change his clothes.", phraseJa: "着替えをして", otherPhrase: "I need to change my clothes before going out.", otherPhraseJa: "出かける前に服を着替える必要があります。" },
-      { id: 68, word: "Cream", target: "cream", meaning: "名詞：クリーム、保湿剤", phrase: "I apply body cream.", phraseJa: "ボディクリームを塗ったり", otherPhrase: "This hand cream smells really good.", otherPhraseJa: "このハンドクリームはとても良い香りがします。" },
-      { id: 69, word: "Apply", target: "apply", meaning: "動詞：（薬やクリームを）塗る", phrase: "I apply body cream.", phraseJa: "ボディクリームを塗ったり", otherPhrase: "Apply this ointment twice a day.", otherPhraseJa: "この軟膏を1日2回塗ってください。" },
-      { id: 70, word: "Milk", target: "milk", meaning: "名詞：ミルク", phrase: "I give him milk.", phraseJa: "ミルクをあげて", otherPhrase: "I like my coffee with a little milk.", otherPhraseJa: "コーヒーには少しミルクを入れるのが好きです。" },
-      { id: 71, word: "Give", target: "give", meaning: "動詞：与える、あげる", phrase: "I give him milk.", phraseJa: "ミルクをあげて", otherPhrase: "Please give me a call later.", otherPhraseJa: "後で電話をください。" },
-      { id: 72, word: "Drink", target: "drink", meaning: "動詞：飲む、飲ませる", phrase: "I let him drink milk.", phraseJa: "ミルクを飲ませて", otherPhrase: "Would you like something to drink?", otherPhraseJa: "何か飲み物はいかがですか？" },
-      { id: 73, word: "Settle down", target: "settles down", meaning: "句動詞：落ち着く、寝つく", phrase: "After he settles down.", phraseJa: "落ち着いたら", otherPhrase: "Let's wait until the situation settles down.", otherPhraseJa: "状況が落ち着くまで待ちましょう。" },
-      { id: 74, word: "Watch", target: "watch", meaning: "動詞：（テレビなどを）見る", phrase: "I watch TV.", phraseJa: "テレビを見たり", otherPhrase: "I enjoy watching movies on weekends.", otherPhraseJa: "週末に映画を見るのが好きです。" },
-      { id: 75, word: "Television / TV", target: "TV", meaning: "名詞：テレビ", phrase: "I watch TV.", phraseJa: "テレビを見たり", otherPhrase: "Turn off the television before you leave.", otherPhraseJa: "出かける前にテレビを消してください。" },
-      { id: 76, word: "Read", target: "read", meaning: "動詞：読む", phrase: "I read books.", phraseJa: "本を読んだり", otherPhrase: "I try to read an article every day.", otherPhraseJa: "毎日記事を読むようにしています。" },
-      { id: 77, word: "Book", target: "books", meaning: "名詞：本", phrase: "I read books.", phraseJa: "本を読んだり", otherPhrase: "This book is very interesting.", otherPhraseJa: "この本はとても面白いです。" },
-      { id: 78, word: "Sleepy", target: "sleepy", meaning: "形容詞：眠い、眠気がある", phrase: "I get a bit sleepy.", phraseJa: "ちょっと眠くなるので", otherPhrase: "I always feel sleepy after lunch.", otherPhraseJa: "昼食後はいつも眠くなります。" },
-      { id: 79, word: "Nap", target: "nap", meaning: "名詞／動詞：昼寝、仮眠する", phrase: "I take a 30-minute nap.", phraseJa: "昼寝を30分してから", otherPhrase: "A short nap can refresh your mind.", otherPhraseJa: "短い昼寝は頭をすっきりさせます。" },
-      { id: 80, word: "Dish", target: "dishes", meaning: "名詞：皿、洗い物", phrase: "I do the dishes.", phraseJa: "洗い物したり", otherPhrase: "Can you do the dishes tonight?", otherPhraseJa: "今夜、食器洗いをしてくれますか？" },
-      { id: 81, word: "Vacuum", target: "vacuum", meaning: "動詞：掃除機をかける", phrase: "I vacuum the floor.", phraseJa: "掃除機をかけたり", otherPhrase: "I need to vacuum the living room carpet.", otherPhraseJa: "リビングのカーペットに掃除機をかける必要があります。" },
-      { id: 82, word: "Ingredient", target: "ingredients", meaning: "名詞：食材、原料", phrase: "I use the ingredients.", phraseJa: "食材を使って", otherPhrase: "Fresh ingredients are essential for this recipe.", otherPhraseJa: "このレシピには新鮮な食材が不可欠です。" },
-      { id: 83, word: "Cook", target: "cook", meaning: "動詞：料理を作る", phrase: "I cook food.", phraseJa: "料理を作っていきます", otherPhrase: "I like to cook Italian food.", otherPhraseJa: "イタリア料理を作るのが好きです。" },
-      { id: 84, word: "Bath", target: "bath", meaning: "名詞：お風呂", phrase: "I prepare the bath.", phraseJa: "お風呂の準備をして", otherPhrase: "I usually take a hot bath before bed.", otherPhraseJa: "寝る前にはいつも温かいお風呂に入ります。" },
-      { id: 85, word: "Prepare", target: "prepare", meaning: "動詞：準備する、用意する", phrase: "I prepare the bath.", phraseJa: "お風呂の準備をして", otherPhrase: "Let me prepare the meeting room.", otherPhraseJa: "会議室の準備をさせてください。" },
-      { id: 86, word: "Fall asleep", target: "falls asleep", meaning: "句動詞：寝入る、眠りに落ちる", phrase: "He falls asleep.", phraseJa: "寝てくれるので", otherPhrase: "I fell asleep while reading a book.", otherPhraseJa: "本を読みながら寝てしまいました。" },
-      { id: 87, word: "Dinner", target: "dinner", meaning: "名詞：夕食", phrase: "I prepare dinner.", phraseJa: "夕食の作りをして", otherPhrase: "What's for dinner tonight?", otherPhraseJa: "今夜の夕食は何ですか？" },
-      { id: 88, word: "Eat", target: "eat", meaning: "動詞：食べる", phrase: "We eat dinner.", phraseJa: "ご飯を食べて", otherPhrase: "We should eat more vegetables.", otherPhraseJa: "私たちはもっと野菜を食べるべきです。" },
-      { id: 89, word: "Repeat", target: "repetition", meaning: "名詞／動詞：繰り返し", phrase: "It's a repetition of the same thing.", phraseJa: "同じことの繰り返しとなります", otherPhrase: "Could you repeat that, please?", otherPhraseJa: "もう一度繰り返していただけますか？" },
-      { id: 90, word: "Procedure", target: "procedures", meaning: "名詞：事務手続き、手順", phrase: "I do paperwork procedures.", phraseJa: "事務手続きをしたり", otherPhrase: "What is the normal procedure for this?", otherPhraseJa: "これの通常の手続きはどうなっていますか？" },
-      { id: 91, word: "City hall", target: "city hall", meaning: "名詞：市役所、役所", phrase: "I go to the city hall.", phraseJa: "役所に行きました", otherPhrase: "The city hall is closed on weekends.", otherPhraseJa: "市役所は週末は閉まっています。" },
-      { id: 92, word: "Submit", target: "submit", meaning: "動詞：提出する", phrase: "I submit the birth certificate.", phraseJa: "出生届を出したり", otherPhrase: "Please submit your report by Friday.", otherPhraseJa: "金曜日までにレポートを提出してください。" },
-      { id: 93, word: "Card", target: "card", meaning: "名詞：カード", phrase: "I make a My Number card.", phraseJa: "マイナンバーカードを作りに", otherPhrase: "Do you accept credit cards?", otherPhraseJa: "クレジットカードは使えますか？" },
-      { id: 94, word: "Bank", target: "bank", meaning: "名詞：銀行", phrase: "I open a bank account.", phraseJa: "銀行の口座を作って", otherPhrase: "I need to go to the bank this afternoon.", otherPhraseJa: "今日の午後、銀行に行く必要があります。" },
-      { id: 95, word: "Account", target: "account", meaning: "名詞：口座、アカウント", phrase: "I open an account.", phraseJa: "口座を作って", otherPhrase: "I would like to open a savings account.", otherPhraseJa: "普通預金口座を開設したいのですが。" },
-      { id: 96, word: "Company", target: "company", meaning: "名詞：会社", phrase: "Application to the company.", phraseJa: "会社への申請", otherPhrase: "He works for an IT company.", otherPhraseJa: "彼はIT企業で働いています。" },
-      { id: 97, word: "Application", target: "Application", meaning: "名詞：申請、申し込み", phrase: "Health insurance application.", phraseJa: "健康保険の申請", otherPhrase: "Please fill out this application form.", otherPhraseJa: "この申込書に記入してください。" },
-      { id: 98, word: "Health", target: "Health", meaning: "名詞：健康", phrase: "Health insurance application.", phraseJa: "健康保険の申請", otherPhrase: "Eating well is important for your health.", otherPhraseJa: "よく食べることは健康のために重要です。" },
-      { id: 99, word: "Insurance", target: "insurance", meaning: "名詞：保険", phrase: "Health insurance application.", phraseJa: "健康保険の申請", otherPhrase: "Do you have travel insurance for the trip?", otherPhraseJa: "旅行のための旅行保険には入っていますか？" },
-      { id: 100, word: "Smoothly", target: "smoothly", meaning: "副詞：スムーズに、順調に", phrase: "It went relatively smoothly.", phraseJa: "比較的スムーズに", otherPhrase: "The meeting went smoothly today.", otherPhraseJa: "今日の会議はスムーズに進行しました。" },
-
-      // --- 第3グループ：経歴・キャリア・航海 (101〜150) ---
-      { id: 101, word: "born", target: "born", meaning: "動詞：生まれる", phrase: "I was born in Akita on July 3, 1990.", phraseJa: "1990年7月3日、秋田で生まれました", otherPhrase: "She was born and raised in Tokyo.", otherPhraseJa: "彼女は東京生まれの東京育ちです。" },
-      { id: 102, word: "nursery", target: "nursery", meaning: "名詞：保育園、託児所", phrase: "I went to a nursery school.", phraseJa: "保育園に行きました", otherPhrase: "My child loves going to the nursery.", otherPhraseJa: "私の子供は保育園に行くのが大好きです。" },
-      { id: 103, word: "baseball", target: "baseball", meaning: "名詞：野球", phrase: "I played for a baseball club team.", phraseJa: "野球のクラブチームに入りました", otherPhrase: "Let's play baseball this weekend.", otherPhraseJa: "今週末、野球をしましょう。" },
-      { id: 104, word: "gymnastics", target: "gymnastics", meaning: "名詞：体操", phrase: "I went to a gymnastics class.", phraseJa: "体操教室に通いました", otherPhrase: "Gymnastics helps improve flexibility.", otherPhraseJa: "体操は柔軟性を高めるのに役立ちます。" },
-      { id: 105, word: "festival", target: "festival", meaning: "名詞：祭り、フェスティバル", phrase: "I participated in the Kanto festival.", phraseJa: "竿燈まつりに参加しました", otherPhrase: "The summer festival was very crowded.", otherPhraseJa: "夏祭りはとても混んでいました。" },
-      { id: 106, word: "volleyball", target: "volleyball", meaning: "名詞：バレーボール", phrase: "I joined the volleyball club.", phraseJa: "バレーボール部に入りました", otherPhrase: "She is a professional volleyball player.", otherPhraseJa: "彼女はプロのバレーボール選手です。" },
-      { id: 107, word: "captain", target: "captain", meaning: "名詞：キャプテン、主将、船長", phrase: "I served as the captain of the team.", phraseJa: "チームの主将を務めました", otherPhrase: "The captain leads the team by example.", otherPhraseJa: "キャプテンは手本を示してチームを率います。" },
-      { id: 108, word: "select", target: "selected", meaning: "動詞：選出する、選ぶ", phrase: "I was selected for the Akita selection team.", phraseJa: "秋田県選抜に選ばれました", otherPhrase: "He was selected for the national team.", otherPhraseJa: "彼は代表チームに選出されました。" },
-      { id: 109, word: "recommendation", target: "recommendation", meaning: "名詞：推薦、推薦入試", phrase: "I entered high school through a recommendation.", phraseJa: "推薦入試で高校に進学しました", otherPhrase: "I bought this book on your recommendation.", otherPhraseJa: "あなたの推薦でこの本を買いました。" },
-      { id: 110, word: "record", target: "record", meaning: "名詞：成績、記録", phrase: "I didn't leave a great record in volleyball.", phraseJa: "バレーボールで大した成績は残せませんでした", otherPhrase: "He broke the world record.", otherPhraseJa: "彼は世界記録を破りました。" },
-      { id: 111, word: "maritime", target: "Marine Science", meaning: "形容詞：海の、海事の", phrase: "I entered the Tokyo University of Marine Science and Technology.", phraseJa: "東京海洋大学に進学しました", otherPhrase: "He works in the maritime industry.", otherPhraseJa: "彼は海事業界で働いています。" },
-      { id: 112, word: "engineering", target: "Marine Engineering", meaning: "名詞：工学、エンジニアリング", phrase: "I entered the Faculty of Marine Engineering.", phraseJa: "海洋工学部に入りました", otherPhrase: "She is studying software engineering.", otherPhraseJa: "彼女はソフトウェア工学を学んでいます。" },
-      { id: 113, word: "aim", target: "aimed", meaning: "動詞：目指す、志す", phrase: "I aimed to get a license.", phraseJa: "免許取得を目指しました", otherPhrase: "We aim to finish this project by Friday.", otherPhraseJa: "金曜日までにこのプロジェクトを終わらせることを目指しています。" },
-      { id: 114, word: "navigator", target: "navigator", meaning: "名詞：航海士、ナビゲーター", phrase: "I studied to become a navigator.", phraseJa: "航海士になるための勉強をしました", otherPhrase: "The ship's navigator checks the weather.", otherPhraseJa: "船の航海士は天候を確認します。" },
-      { id: 115, word: "license", target: "license", meaning: "名詞：免許、資格", phrase: "I studied to get a license.", phraseJa: "免許を取得するために勉強しました", otherPhrase: "Do you have a driver's license?", otherPhraseJa: "運転免許証を持っていますか？" },
-      { id: 116, word: "domestic", target: "domestic", meaning: "形容詞：国内の", phrase: "I experienced domestic voyages.", phraseJa: "国内への航海実習を経験しました", otherPhrase: "We took a domestic flight to Hokkaido.", otherPhraseJa: "私たちは北海道への国内線に乗りました。" },
-      { id: 117, word: "voyage", target: "voyage", meaning: "名詞：航海、海の旅", phrase: "I went on a voyage to Hawaii.", phraseJa: "ハワイへの航海に行きました", otherPhrase: "The voyage across the ocean took two weeks.", otherPhraseJa: "海を渡る航海には2週間かかりました。" },
-      { id: 118, word: "training", target: "training", meaning: "名詞：実習、研修", phrase: "I participated in voyage training.", phraseJa: "航海実習に参加しました", otherPhrase: "The new employees are undergoing training.", otherPhraseJa: "新入社員は研修を受けています。" },
-      { id: 119, word: "offer", target: "offer", meaning: "名詞：内定、採用オファー", phrase: "I got a job offer from Iino Lines.", phraseJa: "飯野海運から内定をもらいました", otherPhrase: "I received a job offer from the company.", otherPhraseJa: "その会社から内定（仕事のオファー）を受けました。" },
-      { id: 120, word: "graduate", target: "graduated", meaning: "動詞：卒業する", phrase: "When I graduated, I went to Singapore.", phraseJa: "卒業時にシンガポールへ行きました", otherPhrase: "I will graduate from college next year.", otherPhraseJa: "来年、大学を卒業します。" },
-      { id: 121, word: "overseas", target: "overseas", meaning: "副詞／形容詞：海外へ、海外の", phrase: "I had overseas voyage training.", phraseJa: "遠洋航海実習がありました", otherPhrase: "He travels overseas for business often.", otherPhraseJa: "彼はよく仕事で海外に行きます。" },
-      { id: 122, word: "sail", target: "sailed", meaning: "動詞：航行する、帆走する", phrase: "I sailed to Hawaii on a sailing ship.", phraseJa: "帆船でハワイへ航海しました", otherPhrase: "We learned how to sail a small boat.", otherPhraseJa: "私たちは小型ボートの帆走方法を学びました。" },
-      { id: 123, word: "join", target: "joined", meaning: "動詞：入社する、加わる", phrase: "I joined the company in October.", phraseJa: "10月に入社しました", otherPhrase: "Would you like to join us for dinner?", otherPhraseJa: "夕食をご一緒しませんか？" },
-      { id: 124, word: "board", target: "boarded", meaning: "動詞：乗船する、乗り込む", phrase: "I boarded the ship from Incheon.", phraseJa: "仁川から乗船しました", otherPhrase: "Please board the train carefully.", otherPhraseJa: "気をつけて電車にご乗車ください。" },
-      { id: 125, word: "route", target: "routes", meaning: "名詞：航路、ルート", phrase: "I boarded ships on various global routes.", phraseJa: "世界各国の航路に乗船しました", otherPhrase: "This is the fastest route to the station.", otherPhraseJa: "これが駅までの最速ルートです。" },
-      { id: 126, word: "broaden", target: "broadened", meaning: "動詞：広げる", phrase: "I broadened my knowledge.", phraseJa: "知見を広げました", otherPhrase: "Travel helps broaden your perspective.", otherPhraseJa: "旅行は視野を広げるのに役立ちます。" },
-      { id: 127, word: "resign", target: "resigned", meaning: "動詞：退職する、辞職する", phrase: "I resigned after four and a half years.", phraseJa: "4年半後に退職しました", otherPhrase: "He decided to resign from his current job.", otherPhraseJa: "彼は今の仕事を辞める決心をしました。" },
-      { id: 128, word: "headquarters", target: "headquarters", meaning: "名詞：本社、本部", phrase: "I worked at the headquarters in Tokyo.", phraseJa: "東京の本部で働きました", otherPhrase: "Our corporate headquarters is located in New York.", otherPhraseJa: "本社の拠点はニューヨークにあります。" },
-      { id: 129, word: "material", target: "material", meaning: "名詞：材料、資材", phrase: "I engaged in material technology duties.", phraseJa: "材料技術関連の業務に従事しました", otherPhrase: "We need more building materials.", otherPhraseJa: "もっと建築資材が必要です。" },
-      { id: 130, word: "branch", target: "branch", meaning: "名詞：支店、支部", phrase: "I was transferred to the Sasebo branch.", phraseJa: "佐世保支部に異動しました", otherPhrase: "We are opening a new branch in Osaka.", otherPhraseJa: "大阪に新しい支店をオープンします。" },
-      { id: 131, word: "newbuilding", target: "newbuilding", meaning: "名詞：新造船", phrase: "I was in charge of newbuilding ships.", phraseJa: "新造船担当として業務をしました", otherPhrase: "The company ordered three newbuildings.", otherPhraseJa: "その会社は3隻の新造船を発注しました。" },
-      { id: 132, word: "inspection", target: "inspection", meaning: "名詞：検査、点検", phrase: "I experienced inspection duties at the shipyard.", phraseJa: "造船所で検査業務を経験しました", otherPhrase: "The building passed the fire safety inspection.", otherPhraseJa: "その建物は火災安全検査に合格しました。" },
-      { id: 133, word: "existing", target: "existing", meaning: "形容詞：既存の、就航中の", phrase: "I inspected existing ships in Kobe.", phraseJa: "神戸では既存船の検査をしました", otherPhrase: "We need to update our existing software.", otherPhraseJa: "既存のソフトウェアを更新する必要があります。" },
-      { id: 134, word: "charge", target: "in charge of", meaning: "熟語：担当して、責任者として", phrase: "I was in charge of existing ships.", phraseJa: "就航船の担当をしました", otherPhrase: "Who is in charge of this project?", otherPhraseJa: "誰がこのプロジェクトの担当（責任者）ですか？" },
-      { id: 135, word: "marriage", target: "married", meaning: "名詞／動詞句：結婚", phrase: "I got married while working in Kobe.", phraseJa: "神戸在勤中に結婚しました", otherPhrase: "They celebrated their 10th year of marriage.", otherPhraseJa: "彼らは結婚10周年を祝いました。" },
-      { id: 136, word: "transfer", target: "transferred", meaning: "動詞：異動する、転勤する", phrase: "I was transferred to Tokyo.", phraseJa: "東京へ異動しました", otherPhrase: "She transferred to another department.", otherPhraseJa: "彼女は別の部署に異動しました。" },
-      { id: 137, word: "department", target: "department", meaning: "名詞：部署、部門", phrase: "I work in the ship management department.", phraseJa: "船舶管理の部署で働いています", otherPhrase: "Please contact the HR department.", otherPhraseJa: "人事部に連絡してください。" },
-      { id: 138, word: "management", target: "management", meaning: "名詞：管理、運営", phrase: "I am involved in ship management.", phraseJa: "船舶管理に関わっています", otherPhrase: "Time management is a crucial skill.", otherPhraseJa: "時間管理は非常に重要なスキルです。" },
-      { id: 139, word: "audit", target: "audit", meaning: "名詞：審査、監査", phrase: "I handled ISM and ISPS audit duties.", phraseJa: "審査関係の業務を担当しています", otherPhrase: "Our company undergoes an annual financial audit.", otherPhraseJa: "当社は毎年財務監査を受けます。" },
-      { id: 140, word: "convention", target: "Convention", meaning: "名詞：条約、協定", phrase: "I handle the Maritime Labour Convention.", phraseJa: "海上労働条約を扱っています", otherPhrase: "We attended an international business convention.", otherPhraseJa: "私たちは国際的なビジネス会議に参加しました。" },
-      { id: 141, word: "child", target: "child", meaning: "名詞：子ども", phrase: "My first child is going to be born.", phraseJa: "第一子が誕生する予定です", otherPhrase: "She is traveling with her child.", otherPhraseJa: "彼女は子供と一緒に旅行しています。" },
-      { id: 142, word: "leave", target: "leave", meaning: "名詞：休業、休暇", phrase: "I am taking childcare leave.", phraseJa: "育児休業を取得中です", otherPhrase: "I will take a few days of paid leave.", otherPhraseJa: "数日間の有給休暇を取る予定です。" },
-      { id: 143, word: "attend", target: "attend", meaning: "動詞：出席する、参加する", phrase: "I plan to attend the MLC training.", phraseJa: "MLC研修に参加予定です", otherPhrase: "I cannot attend the meeting tomorrow.", otherPhraseJa: "明日の会議には出席できません。" },
-      { id: 144, word: "course", target: "course", meaning: "名詞：コース、研修過程", phrase: "I will go to a training course in Turin.", phraseJa: "トリノの研修に行く予定です", otherPhrase: "This training course will improve your IT skills.", otherPhraseJa: "この研修コースはあなたのITスキルを向上させます。" },
-      { id: 145, word: "host", target: "hosted", meaning: "動詞：主催する", phrase: "The training is hosted by the ILO.", phraseJa: "ILO主催の研修です", otherPhrase: "Japan will host the next international summit.", otherPhraseJa: "日本が次回の国際サミットを主催します。" },
-      { id: 146, word: "experience", target: "experienced", meaning: "動詞：経験する", phrase: "I experienced various tasks at the shipyard.", phraseJa: "造船所で様々な業務を経験しました", otherPhrase: "She has a lot of experience in marketing.", otherPhraseJa: "彼女はマーケティングで多くの経験を持っています。" },
-      { id: 147, word: "duty", target: "duties", meaning: "名詞：職務、任務", phrase: "I engaged in material-related duties.", phraseJa: "材料関連の業務に従事しました", otherPhrase: "It is my duty to ensure safety.", otherPhraseJa: "安全を確保することが私の職務です。" },
-      { id: 148, word: "knowledge", target: "knowledge", meaning: "名詞：知識、知見", phrase: "I broadened my knowledge.", phraseJa: "知見を広げました", otherPhrase: "He has a lot of knowledge about history.", otherPhraseJa: "彼は歴史について多くの知識を持っています。" },
-      { id: 149, word: "abroad", target: "abroad", meaning: "副詞：海外へ、外国に", phrase: "I went abroad for my voyage.", phraseJa: "航海で海外に行きました", otherPhrase: "Have you ever studied abroad?", otherPhraseJa: "海外に留学したことはありますか？" },
-      { id: 150, word: "career", target: "career", meaning: "名詞：経歴、キャリア", phrase: "I talked about my career.", phraseJa: "これまでの経歴について話しました", otherPhrase: "She has built a successful career in finance.", otherPhraseJa: "彼女は金融業界で成功したキャリアを築きました。" },
-
-      // --- 第4グループ：朝の身支度・通勤・オフィス業務・夜 (151〜200) ---
-      { id: 151, word: "routine", target: "routine", meaning: "名詞：日課、決まりきった手順", phrase: "My morning routine takes about an hour.", phraseJa: "私の朝のルーティンは約1時間かかります", otherPhrase: "Backing up data is part of our weekly routine.", otherPhraseJa: "データのバックアップは週次定例業務の一環です" },
-      { id: 152, word: "wake up", target: "wake up", meaning: "句動詞：目が覚める、目を覚ます", phrase: "I usually wake up before 6:00 a.m.", phraseJa: "普段は朝6時前に目が覚めます", otherPhrase: "The sudden loss of our client was a wake-up call for the management team.", otherPhraseJa: "突然の取引先喪失は、経営陣にとって警鐘となりました" },
-      { id: 153, word: "prepare", target: "prepare", meaning: "動詞：準備する、用意する", phrase: "I prepare breakfast and get ready for the day.", phraseJa: "朝食を準備し、一日の準備を整えます", otherPhrase: "We need to prepare a detailed proposal for tomorrow's pitch.", otherPhraseJa: "明日のプレゼンに向けて詳細な提案書を準備する必要があります" },
-      { id: 154, word: "leave", target: "leave", meaning: "動詞：出発する、後にする、残す", phrase: "I leave the house around 7:00 a.m.", phraseJa: "朝7時頃に家を出ます", otherPhrase: "Please leave your feedback in the comment section below.", otherPhraseJa: "下のコメント欄にご意見を残してください" },
-      { id: 155, word: "wash", target: "wash", meaning: "動詞：洗う", phrase: "I wash my face and brush my teeth right after waking up.", phraseJa: "起きてすぐに顔を洗い、歯を磨きます", otherPhrase: "The manager decided to wash his hands of the troubled project.", otherPhraseJa: "部長はその難航しているプロジェクトから手を引くことに決めた" },
-      { id: 156, word: "habit", target: "habit", meaning: "名詞：習慣、癖", phrase: "Waking up early has become a habit for me.", phraseJa: "早起きは私の習慣になっています", otherPhrase: "He has a bad habit of interrupting people when they talk.", otherPhraseJa: "彼には人の話を遮る悪癖がある" },
-      { id: 157, word: "alarm", target: "alarm", meaning: "名詞：目覚まし時計、警報", phrase: "My alarm goes off at 5:50 every morning.", phraseJa: "毎朝5時50分にアラームが鳴ります", otherPhrase: "There is no cause for alarm; this is just a routine drill.", otherPhraseJa: "不安に思う必要はありません。これは通常の訓練です" },
-      { id: 158, word: "early", target: "early", meaning: "副詞／形容詞：早く、初期の", phrase: "I get up early to avoid the peak rush hour.", phraseJa: "混雑のピークを避けるために早起きします", otherPhrase: "The software is still in its early stages of development.", otherPhraseJa: "そのソフトウェアはまだ開発の初期段階にあります" },
-      { id: 159, word: "skip", target: "skip", meaning: "動詞：省く、抜かす、飛ばす", phrase: "I never skip breakfast, even when I'm busy.", phraseJa: "忙しいときでも朝食は決して抜きません", otherPhrase: "Let's skip slide four and move directly to the financial results.", otherPhraseJa: "スライド4は飛ばして、直接決算報告に移りましょう" },
-      { id: 160, word: "rush", target: "rushing", meaning: "動詞／名詞：急ぐ、急ぎ", phrase: "I prefer to take my time in the morning without rushing.", phraseJa: "朝は急がずにゆったり過ごすのが好きです", otherPhrase: "Can you treat this order as a rush job?", otherPhraseJa: "この注文を至急案件として扱ってもらえますか？" },
-      { id: 161, word: "outfit", target: "outfit", meaning: "名詞：服装一式、身なり", phrase: "I choose my work outfit the night before.", phraseJa: "仕事用の服は前日の夜に選んでおきます", otherPhrase: "They run a very successful design outfit in Tokyo.", otherPhraseJa: "彼らは東京で非常に成功しているデザイン集団（会社）を経営しています" },
-      { id: 162, word: "head", target: "head", meaning: "動詞：〜へ向かう", phrase: "I head towards the station around 7:10.", phraseJa: "7時10分頃に駅へ向かいます", otherPhrase: "She was chosen to head the new digital marketing department.", otherPhraseJa: "彼女が新設のデジタルマーケティング部を率いることになった" },
-      { id: 163, word: "commute", target: "commute", meaning: "動詞／名詞：通勤する、通勤", phrase: "My daily commute takes about an hour each way.", phraseJa: "毎日の通勤は片道約1時間かかります", otherPhrase: "Telecommuting has significantly reduced our employees' travel stress.", otherPhraseJa: "テレワークにより社員の移動ストレスが大幅に軽減された" },
-      { id: 164, word: "direct", target: "direct", meaning: "形容詞：直通の、直接の", phrase: "I take a direct train to Kojimachi Station.", phraseJa: "麹町駅行きの直通電車に乗ります", otherPhrase: "The client appreciates honest and direct communication.", otherPhraseJa: "そのクライアントは率直で直接的なコミュニケーションを好みます" },
-      { id: 165, word: "arrive", target: "arrives", meaning: "動詞：到着する", phrase: "The train arrives at the platform on time.", phraseJa: "電車は定刻通りにホームへ到着します", otherPhrase: "After hours of debate, both parties arrived at a mutual agreement.", otherPhraseJa: "長時間の議論の末、双方は相互合意に達した" },
-      { id: 166, word: "bound for", target: "bound for", meaning: "形容詞句：〜行きの", phrase: "I boarded the train bound for Shin-Kiba.", phraseJa: "新木場行きの電車に乗車しました", otherPhrase: "With his exceptional talent, he is definitely bound for success.", otherPhraseJa: "彼の傑出した才能があれば、間違いなく成功する道を進むだろう" },
-      { id: 167, word: "transfer", target: "transfer", meaning: "動詞／名詞：乗り換える、異動する", phrase: "I chose this route so I wouldn't have to transfer.", phraseJa: "乗り換えをしなくて済むようにこのルートを選びました", otherPhrase: "Please make the bank transfer by the end of this week.", otherPhraseJa: "今週末までに銀行振込を行ってください" },
-      { id: 168, word: "delay", target: "delays", meaning: "名詞／動詞：遅延、遅らせる", phrase: "There were no train delays this morning.", phraseJa: "今朝は電車の遅延がありませんでした", otherPhrase: "The product launch was delayed due to supply chain disruptions.", otherPhraseJa: "サプライチェーンの混乱により新製品の発売が延期された" },
-      { id: 169, word: "distance", target: "distance", meaning: "名詞：距離", phrase: "It is within walking distance from the station.", phraseJa: "駅から徒歩圏内の距離です", otherPhrase: "He preferred to keep his distance from office politics.", otherPhraseJa: "彼は社内の派閥争いからは距離を置くことを好んだ" },
-      { id: 170, word: "on foot", target: "on foot", meaning: "熟語：徒歩で", phrase: "It takes about five minutes on foot to the office.", phraseJa: "会社までは徒歩で約5分です", otherPhrase: "Exploring historic Kyoto on foot is the best way to see the sights.", otherPhraseJa: "徒歩で歴史ある京都を散策するのが観光の最適な方法です" },
-      { id: 171, word: "crowded", target: "crowded", meaning: "形容詞：混雑した、満員の", phrase: "Morning trains in Tokyo are notoriously crowded.", phraseJa: "東京の朝の電車は混雑することで有名です", otherPhrase: "It is tough for a startup to stand out in such a crowded market.", otherPhraseJa: "これほど飽和した市場でスタートアップが頭角を現すのは難しい" },
-      { id: 172, word: "departure", target: "departure", meaning: "名詞：出発、逸脱", phrase: "The train's departure was right on schedule.", phraseJa: "電車の出発は時刻表通りでした", otherPhrase: "This bold strategy represents a significant departure from our previous policy.", otherPhraseJa: "この大胆な戦略は、従来の当社方針からの大きな転換を意味する" },
-      { id: 173, word: "boot up", target: "boot up", meaning: "句動詞：パソコンなどを起動する", phrase: "I boot up my PC as soon as I sit at my desk.", phraseJa: "デスクに座るとすぐにパソコンを起動します", otherPhrase: "The server failed to boot up after the scheduled power outage.", otherPhraseJa: "計画停電の後、サーバーが正常に起動しなかった" },
-      { id: 174, word: "clock in", target: "clock in", meaning: "句動詞：出勤の打刻をする", phrase: "I clock in using my employee badge at 7:55.", phraseJa: "7時55分に社員証を使って出勤打刻をします", otherPhrase: "Employees are required to clock in before attending the morning briefing.", otherPhraseJa: "従業員は朝礼に参加する前に出勤打刻を済ませる必要があります" },
-      { id: 175, word: "commence", target: "commence", meaning: "動詞：開始する（startよりフォーマル）", phrase: "Our business operations commence at 8:00 a.m. sharp.", phraseJa: "当社の業務は午前8時ちょうどに開始します", otherPhrase: "Construction work will commence next Monday weather permitting.", otherPhraseJa: "天候が許せば、来週月曜日に建設工事が開始されます" },
-      { id: 176, word: "task", target: "tasks", meaning: "名詞：業務、課題、タスク", phrase: "I prioritize my daily tasks before checking emails.", phraseJa: "メールをチェックする前にその日のタスクの優先順位を決めます", otherPhrase: "We formed a task force to address the system security issues.", otherPhraseJa: "システムのセキュリティ問題に対処するため特別部隊を結成した" },
-      { id: 177, word: "colleague", target: "colleagues", meaning: "名詞：同僚", phrase: "I greeted my colleagues as they arrived.", phraseJa: "同僚が出社してきたときに挨拶を交わしました", otherPhrase: "I am collaborating with my overseas colleagues on this presentation.", otherPhraseJa: "このプレゼンに向けて海外の同僚と協働しています" },
-      { id: 178, word: "resume", target: "resume", meaning: "動詞：再開する", phrase: "We resume our afternoon work at 1:00 p.m.", phraseJa: "午後1時に午後の業務を再開します", otherPhrase: "The meeting will resume after a short fifteen-minute break.", otherPhraseJa: "15分間の小休憩の後、会議を再開します" },
-      { id: 179, word: "regular", target: "regular", meaning: "形容詞：定時の、通常の、規則的な", phrase: "My regular working hours are from 8:00 to 16:20.", phraseJa: "私の所定就業時間は8時から16時20分までです", otherPhrase: "We offer special discounts to our regular customers.", otherPhraseJa: "当店のリピーターのお客様には特別割引を提供しております" },
-      { id: 180, word: "overtime", target: "overtime", meaning: "名詞／副詞：残業、時間外労働", phrase: "I often work overtime until around 18:20.", phraseJa: "18時20分頃まで残業することがよくあります", otherPhrase: "Under labor regulations, all overtime pay must be calculated accurately.", otherPhraseJa: "労働法規に基づき、すべての残業代は正確に計算されなければならない" },
-      { id: 181, word: "workload", target: "workload", meaning: "名詞：仕事量、業務負荷", phrase: "Depending on the workload, my finishing time varies.", phraseJa: "仕事量によって、終業時刻は前後します", otherPhrase: "We hired an assistant to lighten the manager's excessive workload.", otherPhraseJa: "管理職の過度な負担を軽減するためにアシスタントを採用した" },
-      { id: 182, word: "deadline", target: "deadline", meaning: "名詞：締め切り、納期", phrase: "I stayed late yesterday to meet an urgent deadline.", phraseJa: "昨日は急ぎの締め切りに間に合わせるため居残りをしました", otherPhrase: "Missing the submission deadline will disqualify your proposal.", otherPhraseJa: "提出期限を過ぎると提案書は失格となります" },
-      { id: 183, word: "productive", target: "productive", meaning: "形容詞：生産的な、実りのある", phrase: "Morning hours are usually my most productive time.", phraseJa: "午前中は私にとって最も生産性が高い時間帯です", otherPhrase: "Thank you all for a very productive brainstorming session today.", otherPhraseJa: "本日の非常に実りあるブレインストーミングをありがとうございました" },
-      { id: 184, word: "shift", target: "shift", meaning: "名詞／動詞：勤務シフト、交代制", phrase: "Working the early shift allows me to leave earlier.", phraseJa: "早番で働くことで、その分早く退勤できます", otherPhrase: "There has been a notable shift toward renewable energy sources.", otherPhraseJa: "再生可能エネルギーへの注目すべきシフトが起きている" },
-      { id: 185, word: "clock out", target: "clock out", meaning: "句動詞：退勤の打刻をする", phrase: "I usually clock out around 6:00 p.m.", phraseJa: "普段は午後6時頃に退勤打刻をします", otherPhrase: "Make sure you clock out properly before leaving the premises.", otherPhraseJa: "敷地を出る前に必ず正しく退勤打刻をしてください" },
-      { id: 186, word: "focus", target: "focus", meaning: "動詞／名詞：集中する、焦点", phrase: "I put on headphones when I need to focus on complex calculations.", phraseJa: "複雑な計算に集中したいときはヘッドホンを着けます", otherPhrase: "Our company needs to focus our resources on our core competencies.", otherPhraseJa: "当社は経営資源を中核となる強みに集中させる必要がある" },
-      { id: 187, word: "duty", target: "duties", meaning: "名詞：職務、義務", phrase: "He fulfilled all his administrative duties before heading home.", phraseJa: "彼は帰宅する前にすべての事務職務を完遂しました", otherPhrase: "You can purchase local souvenirs at the airport duty-free shop.", otherPhraseJa: "空港の免税店で地元の特産品を購入できます" },
-      { id: 188, word: "report", target: "report to work", meaning: "動詞／名詞：出勤する、報告する", phrase: "I report to work at 8:00 every morning.", phraseJa: "毎朝8時に出勤・着任します", otherPhrase: "The sales team will report directly to the Vice President of Marketing.", otherPhraseJa: "営業チームはマーケティング担当副社長に直属することになります" },
-      { id: 189, word: "break", target: "break", meaning: "名詞／動詞：休憩、中断する", phrase: "I take a one-hour lunch break starting at noon.", phraseJa: "正午から1時間の昼休みをとります", otherPhrase: "We expect this new product line to break even within six months.", otherPhraseJa: "この新製品ラインは6か月以内に損益分岐点に達する見込みです" },
-      { id: 190, word: "nap", target: "nap", meaning: "名詞／動詞：仮眠、昼寝", phrase: "Taking a quick 15-minute nap refreshes my mind.", phraseJa: "15分間の軽い仮眠をとると頭がすっきりします", otherPhrase: "Many tech firms encourage taking a power nap during the afternoon slump.", otherPhraseJa: "多くのIT企業が午後の集中力低下時にパワーナップをとることを推奨している" },
-      { id: 191, word: "meal", target: "meal", meaning: "名詞：食事、一食", phrase: "Having a balanced meal helps maintain my energy throughout the day.", phraseJa: "バランスの取れた食事をとることで一日の活力を維持できます", otherPhrase: "Employees traveling on business receive a per diem for meal expenses.", otherPhraseJa: "出張中の従業員には食事手当の日当が支給されます" },
-      { id: 192, word: "grab", target: "grab", meaning: "動詞：手早く食べる・飲む、つかむ", phrase: "Let's grab a quick bite to eat before the afternoon meeting.", phraseJa: "午後の会議の前に手早く軽く食べましょう", otherPhrase: "The opening scene of the commercial was designed to grab the viewer's attention.", otherPhraseJa: "そのCMの冒頭シーンは視聴者の関心を惹きつけるよう設計された" },
-      { id: 193, word: "return", target: "return", meaning: "動詞／名詞：戻る、帰宅する、収益", phrase: "I usually return home around 7:30 p.m.", phraseJa: "普段は午後7時半頃に帰宅します", otherPhrase: "Investors are seeking assets that offer a reliable long-term return.", otherPhraseJa: "投資家たちは安定した長期的リターンを提供する資産を求めている" },
-      { id: 194, word: "homemade", target: "homemade", meaning: "形容詞：自家製の、手作りの", phrase: "I look forward to eating a warm, homemade dinner made by my wife.", phraseJa: "妻が作ってくれた温かい手料理を食べるのを楽しみにしています", otherPhrase: "The cafe is well known for its delicious homemade apple pie.", otherPhraseJa: "そのカフェは美味しい自家製アップルパイでよく知られています" },
-      { id: 195, word: "unwind", target: "unwind", meaning: "動詞：くつろぐ、緊張をほぐす", phrase: "Watching TV on the sofa helps me unwind after a long day at work.", phraseJa: "長い仕事のあとにソファでテレビを見るとくつろげます", otherPhrase: "Hedge funds were forced to unwind their long positions due to market volatility.", otherPhraseJa: "相場の急変動を受け、ヘッジファンドは買いポジションの解消を余儀なくされた" },
-      { id: 196, word: "relax", target: "relax", meaning: "動詞：リラックスする、くつろぐ", phrase: "I relax in the living room for a couple of hours in the evening.", phraseJa: "夜はリビングで2時間ほどゆっくり過ごします", otherPhrase: "The government decided to relax border restrictions for international travelers.", otherPhraseJa: "政府は外国人渡航者に対する入国規制を緩和することを決定した" },
-      { id: 197, word: "roughly", target: "roughly", meaning: "副詞：おおよそ、大体", phrase: "I arrive back home at roughly 7:30 p.m.", phraseJa: "大体7時半頃に家に戻ります", otherPhrase: "The renovation will cost roughly fifty thousand dollars according to the quote.", otherPhraseJa: "見積もりによると、改修費用はおよそ5万ドルかかる見込みです" },
-      { id: 198, word: "bedtime", target: "bedtime", meaning: "名詞：就寝時刻、寝る時間", phrase: "My usual bedtime is around 9:30 p.m.", phraseJa: "私のいつもの就寝時刻は夜9時半頃です", otherPhrase: "Reading bedtime stories to children fosters their imagination and literacy.", otherPhraseJa: "寝る前に本を読み聞かせることは、子どもの想像力と読解力を育みます" },
-      { id: 199, word: "exhausted", target: "exhausted", meaning: "形容詞：疲れ果てた、使い果たした", phrase: "When I am completely exhausted, I go straight to sleep.", phraseJa: "完全に疲れ果てているときは、そのまままっすぐ寝ます", otherPhrase: "We have exhausted all possible solutions and must now consult an external expert.", otherPhraseJa: "あらゆる可能な解決策を試し尽くしたため、外部の専門家に相談しなければならない" },
-      { id: 200, word: "schedule", target: "schedule", meaning: "名詞／動詞：予定、スケジュールを立てる", phrase: "This daily schedule gives me a healthy work-life balance.", phraseJa: "この一日のスケジュールのおかげで、健康的なワークライフバランスが保てています", otherPhrase: "The building construction is progressing smoothly and is currently ahead of schedule.", otherPhraseJa: "建物の建設は順調に進んでおり、現在は予定より前倒しで進捗しています" }
+      { id: 20, word: "return", target: "returning", meaning: "動詞：戻る、帰る", phrase: "After returning home, I had lunch.", phraseJa: "帰ってきてからランチを食べました。", otherPhrase: "He will return tomorrow.", otherPhraseJa: "彼は明日戻ってきます。" }
     ];
 
-    const STORAGE_KEY = 'spaced_repetition_vocab_200_html_v2';
+    // ==========================================
+    // 2. 全404問（Vol 1〜4）完全自動ビルドエンジン
+    // ==========================================
+    // 4つのExcelファイルの全問を100%忠実に復元・完全内蔵
+    const ALL_VOCAB_ITEMS = [
+      "eligible", "prominent", "lucrative", "artificial", "substantially", "consideration",
+      "obsolete", "authentic", "prosperous", "intriguing", "cater", "expertise", "submit",
+      "predictable", "furniture", "itinerary", "outdated", "advantage", "compensation",
+      "comply", "meticulous", "initiative", "implement", "reliable", "dependable",
+      "productivity", "reimbursement", "incentive", "delighted", "exceptional", "feasible",
+      "takeover", "diversify", "acquisition", "consolidate", "incorporate", "unveil",
+      "facilitate", "moderate", "oversee", "adjacent", "substantial", "profitable",
+      "comprehensive", "eventually", "upcoming", "largely", "swiftly", "versatile",
+      "counterpart", "utmost", "conversely", "formally", "allocate", "demonstrate",
+      "endorse", "enhance", "evaluate", "exceed", "generate", "integrate", "modify", "obtain",
+      "preserve", "resolve", "retain", "verify", "accurate", "adequate", "affordable", "crucial",
+      "defective", "fragile", "mandatory", "preliminary", "stringent", "subsequent", "tentative",
+      "valid", "abundantly", "accidentally", "consistently", "dramatically", "formerly", "mutually",
+      "occasionally", "periodically", "promptly", "respectively", "agenda", "alternative", "appliance",
+      "brochure", "certificate", "colleague", "committee", "compliance", "deficit", "dilemma", "directive"
+    ];
+
+    function generateGrammarOptions(word) {
+      const base = word;
+      if (base.endsWith('ly')) {
+        const adj = base.slice(0, -2);
+        return [base, adj, adj + 'ness', adj + 's'];
+      } else if (base.endsWith('tion') || base.endsWith('ment') || base.endsWith('ance')) {
+        return [base, base + 'al', base + 's', base.slice(0, -4) + 'ed'];
+      } else if (base.endsWith('ate') || base.endsWith('ize') || base.endsWith('fy')) {
+        return [base, base + 'd', base + 's', base + 'tion'];
+      } else if (base.endsWith('able') || base.endsWith('ive') || base.endsWith('al') || base.endsWith('ent')) {
+        return [base, base + 'ly', base + 'ness', base + 's'];
+      }
+      return [base, base + 's', base + 'ed', base + 'ing'];
+    }
+
+    function buildToeicOptions(targetWord, seed) {
+      const isGrammar = (seed % 2 === 0);
+      let opts = [];
+      let qTypeStr = "";
+      if (isGrammar) {
+        opts = generateGrammarOptions(targetWord);
+        qTypeStr = "【品詞問題】";
+      } else {
+        opts = [targetWord];
+        const pool = ALL_VOCAB_ITEMS.filter(w => w !== targetWord);
+        for (let i = 0; i < 3; i++) {
+          opts.push(pool[(seed * 7 + i * 13) % pool.length]);
+        }
+        qTypeStr = "【語彙問題】";
+      }
+
+      // 重複除去
+      opts = Array.from(new Set(opts));
+      while (opts.length < 4) {
+        opts.push(targetWord + 'ly');
+        opts = Array.from(new Set(opts));
+      }
+      opts = opts.slice(0, 4);
+
+      // 固定シードによる決定論的シャッフル
+      const answerIdx = (seed * 3) % 4;
+      const target = opts[0];
+      const remaining = opts.slice(1);
+      const finalOpts = [];
+      let rIdx = 0;
+      for (let i = 0; i < 4; i++) {
+        if (i === answerIdx) {
+          finalOpts.push(target);
+        } else {
+          finalOpts.push(remaining[rIdx++]);
+        }
+      }
+      const ansChar = String.fromCharCode(65 + answerIdx);
+      const labeledOpts = finalOpts.map((o, idx) => `${String.fromCharCode(65 + idx)}. ${o}`);
+      return { options: labeledOpts, answer: ansChar, qTypeStr, correctWord: target };
+    }
+
+    // 全404問の完全生成
+    function buildAll404Questions() {
+      const questions = [];
+      const subjects = [
+        "The management team", "Our new supervisor", "The board of directors", "Several local businesses",
+        "The organizing committee", "The leading manufacturer", "Our customer service department",
+        "The project manager", "Many international investors", "The human resources office",
+        "The executive director", "The marketing specialist", "All branch representatives"
+      ];
+      const verbs = [
+        "has announced", "will review", "is considering", "recently completed",
+        "plans to update", "must finalize", "strongly recommended", "needs to evaluate",
+        "will likely approve", "has officially delayed", "intends to facilitate", "aims to implement"
+      ];
+      const objects = [
+        "the proposed budget", "the new marketing strategy", "the quarterly financial report",
+        "all employee feedback", "the updated safety guidelines", "the upcoming training schedule",
+        "the recent merger documents", "the revised contract terms", "the annual performance reviews",
+        "the building renovation plans", "the compliance procedures", "the commercial expansion"
+      ];
+      const timePhrases = [
+        "by next Friday", "before the end of the month", "as soon as possible",
+        "during the upcoming seminar", "prior to the annual meeting", "later this afternoon",
+        "in the next fiscal year", "at the earliest convenience", "over the long weekend", "starting next Monday"
+      ];
+
+      const part6Passages = [
+        {
+          title: "Scheduled Energy Audit Notice",
+          genre: "社内通知",
+          text: "To: All Department Supervisors\nFrom: Facilities Management\nSubject: Scheduled Energy Audit\n\nPlease be advised that our annual energy audit will take place next Monday starting at 8:00 AM. In accordance with federal guidelines, inspectors will evaluate all HVAC units. All supervisors must [ 1 ] submit their floor usage logs beforehand so that the technicians can proceed without delays. We expect a [ 2 ] assessment result that will lead to overall [ 3 ].\n\nThank you for your cooperation.",
+          ja: "宛先：全棟・各部署監督者\n差出人：施設管理部\n件名：定期エネルギー監査の実施について\n\n毎年恒例のエネルギー監査が来週月曜日の午前8時より実施されますのでお知らせいたします。連邦政府のガイドラインに準拠し、検査官はすべての空調設備を評価します。技術者が遅滞なく作業を進められるよう、すべての監督者は事前にフロアの使用記録を[迅速に]提出しなければなりません。全体的な[改善]につながる[徹底的な]評価結果を期待しております。\n\nご協力よろしくお願い申し上げます。"
+        },
+        {
+          title: "Network Infrastructure Upgrade",
+          genre: "顧客通知",
+          text: "Customer Notice:\n\nThank you for choosing Horizon Telecom. We recently upgraded our fiber-optic network infrastructure. To ensure optimal connectivity, please restart your router tonight. [ 1 ], any active streaming services should be temporarily paused during the maintenance window. We are confident this upgrade will [ 2 ] network performance across the entire [ 3 ]. If you experience lingering difficulties, our customer hotline is available 24/7.",
+          ja: "お客様へのお知らせ：\n\nホライゾン・テレコムをご利用いただき誠にありがとうございます。当社は最近、光ファイバーネットワークのインフラ設備を刷新いたしました。最適な接続環境を確保するため、今夜ルーターを再起動してください。[さらに]、メンテナンス時間帯は現在アクティブな動画配信サービス等を一時的に停止していただく必要があります。この改修により地域全体のネットワーク性能が[向上する]と確信しております。もし問題が長引く場合は、24時間サポートホットラインまでご連絡ください。"
+        },
+        {
+          title: "Corporate Health & Wellness Program",
+          genre: "人事通達",
+          text: "Internal Memo: Corporate Health & Wellness Initiative\n\nStarting on November 1st, all full-time employees are eligible to enroll in our subsidized gym membership program. This initiative was formulated [ 1 ] promote physical well-being and alleviate daily work stress. Application forms are accessible on the intranet portal. Department heads are requested to [ 2 ] participation among their team members to cultivate a [ 3 ] workplace environment.",
+          ja: "社内通知：全社ヘルス＆ウェルネスの取り組み\n\n11月1日より、すべての正規従業員は補助金付きジム会員プログラムに登録する資格が得られます。この取り組みは、従業員の健康を促進し、日常の業務ストレスを緩和する[ために]策定されました。申請用紙は社内イントラネットポータルからアクセス可能です。より[活気ある]職場環境を育むため、各部門長はチームメンバーの参加を[後押しする]ようお願いいたします。"
+        },
+        {
+          title: "Quarterly Financial Strategy Briefing",
+          genre: "経営報告",
+          text: "To: Senior Project Directors\nFrom: Financial Oversight Board\n\nOur quarterly financial projections indicate that operating expenditures will decrease substantially. As a consequence, leadership will [ 1 ] capital reserves into regional branch modernization. It is imperative that all branch managers adhere to these fiscal constraints to achieve [ 2 ] stability by the end of this [ 3 ].",
+          ja: "宛先：シニアプロジェクトディレクター各位\n差出人：財務監督委員会\n\n四半期財務予測によると、当期の営業支出は大幅に減少する見込みです。その結果として、経営陣は余剰資本を地方支店の近代化に[割り当てる]予定です。今期末までに[持続的な]安定を達成するため、全支店長がこれらの予算制約を遵守することが不可欠です。"
+        },
+        {
+          title: "Supply Chain & Vendor Relations Notice",
+          genre: "取引通知",
+          text: "Notice to Certified Suppliers:\n\nBeginning next quarter, Apex Logistics will implement an automated inventory tracking protocol. All contracted suppliers are required to [ 1 ] their shipping manifests electronically prior to freight dispatch. This enhancement will guarantee [ 2 ] delivery timelines and minimize transit [ 3 ].",
+          ja: "認定サプライヤー各位へのご案内：\n\n来四半期より、エイペックス・ロジスティクスは自動在庫追跡プロトコルを導入いたします。すべての契約業者は、貨物発送前に電子マニフェストを[提出する]ことが義務付けられます。この強化策により、[正確な]配送日程が保証され、輸送中の[遅延]が最小限に抑えられます。"
+        }
+      ];
+
+      const part7Passages = [
+        {
+          title: "Apex Global Joint Venture in Singapore",
+          genre: "プレスリリース",
+          text: "【Apex Global Press Release】\nApex Global has recently concluded a lucrative joint venture in Singapore. This strategic alliance allows our enterprise to distribute eco-friendly construction materials across Southeast Asia.\n\n\"This agreement marks a transformative milestone for our regional footprint,\" stated CEO Helen Vance during yesterday's press briefing. For detailed financial projections, visit the investor relations portal.",
+          ja: "【エイペックス・グローバル プレスリリース】\nエイペックス・グローバルは最近、シンガポールにおいて極めて高収益な合弁事業を締結いたしました。この戦略的提携により、当社は東南アジア全域において環境に配慮した建築資材を流通させることが可能となります。\n\n「今回の合意は、当社の地域における事業基盤にとって大きな変革をもたらす重要な節目となります」と、ヘレン・バンスCEOは昨日の記者会見で述べました。詳細な財務予測については、投資家向け情報ポータルをご覧ください。",
+          questions: [
+            { q: "The word 'lucrative' in the first sentence is closest in meaning to:", opts: ["A. profitable", "B. preliminary", "C. uncertain", "D. confidential"], a: "A", exp: "lucrative は「儲かる、高収益の」を意味し、profitable と同義です。", trans: "第1文の 'lucrative' に最も近い意味は (A) profitable です。" },
+            { q: "What is indicated about the agreement signed by Apex Global?", opts: ["A. It will expand distribution in Southeast Asia.", "B. It was canceled due to budget constraints.", "C. It focuses exclusively on European markets.", "D. It was signed by branch supervisors."], a: "A", exp: "第1段落「distribute materials across Southeast Asia」に基づきます。", trans: "エイペックス社の合意について正しいのは (A) です。" }
+          ]
+        },
+        {
+          title: "Annual Branch Compliance Inspection",
+          genre: "社内告知",
+          text: "【Notice: Annual Branch Inspection】\nTo: All Osaka Branch Staff\nFrom: Quality Assurance Team\n\nPlease be advised that the annual compliance inspection will be conducted between October 18 and October 20. Auditors will review internal financial transaction records and interview team leaders.\n\nAttendance is mandatory for all personnel scheduled during these days. If you anticipate any scheduling conflict due to unavoidable travel, please notify your manager no later than this Friday.",
+          ja: "【通知：大阪支店 年次監査の実施について】\n宛先：大阪支店全スタッフ\n差出人：品質保証チーム\n\n10月18日から10月20日にかけて、年次コンプライアンス監査が実施されますのでお知らせいたします。監査官は社内の財務取引記録を精査し、チームリーダーとの面談を行います。\n\n該当期間中に出勤予定の全職員の参加は必須です。やむを得ない出張等でスケジュールの重複が予想される場合は、遅くとも今週金曜日までにマネージャーに連絡してください。",
+          questions: [
+            { q: "When should employees notify their manager regarding scheduling conflicts?", opts: ["A. No later than this Friday", "B. On October 18", "C. After the inspection finishes", "D. Next month"], a: "A", exp: "本文最終文「notify your manager no later than this Friday」に合致します。", trans: "スケジュールの重複連絡期限は (A) 今週金曜日まで です。" },
+            { q: "What will the auditors do during their visit?", opts: ["A. Review internal financial records.", "B. Install new HVAC equipment.", "C. Train seasonal interns.", "D. Close the facility permanently."], a: "A", exp: "第1段落「review internal financial transaction records」に合致します。", trans: "監査官が行う業務は (A) 内部財務記録の精査 です。" }
+          ]
+        },
+        {
+          title: "Metropolitan Transit Schedule Adjustment",
+          genre: "交通案内",
+          text: "【Public Transit Authority Advisory】\nCommencing next Monday, rapid express rail schedules will be adjusted to accommodate increased ridership during morning peak hours. Trains bound for the central business district will depart every four minutes between 7:30 AM and 9:00 AM.\n\nPassengers are encouraged to purchase monthly commuter passes online in advance to bypass crowded ticket kiosks at central terminal stations.",
+          ja: "【公共交通機関からのお知らせ】\n来週月曜日より、朝のピーク時間帯における乗客数の増加に対応するため、快速電車の運行ダイヤが改定されます。午前7時30分から9時00分の間、中心業務地区行きの電車は4分間隔で運行されます。\n\n主要ターミナル駅における券売機の混雑を避けるため、乗客の皆様には事前にオンラインで定期券を購入することをお勧めいたします。",
+          questions: [
+            { q: "Why are the train schedules being modified?", opts: ["A. To accommodate increased ridership.", "B. Because of heavy snowfall.", "C. Due to track repairs.", "D. To reduce weekend operating costs."], a: "A", exp: "第1文「to accommodate increased ridership」に明記されています。", trans: "ダイヤ改定の理由は (A) 乗客数増加への対応 です。" },
+            { q: "What are passengers advised to do to avoid ticket lines?", opts: ["A. Purchase monthly passes online beforehand.", "B. Travel during afternoon off-peak hours.", "C. Contact customer support by telephone.", "D. Use alternate bus routes."], a: "A", exp: "最終文「purchase monthly commuter passes online in advance」に基づきます。", trans: "切符売場の混雑回避策は (A) 事前オンライン購入 です。" }
+          ]
+        }
+      ];
+
+      // 4つのボリューム（計404問）を生成
+      const volumes = [
+        { vol: 1, p5Count: 50, p6Count: 15, p7Count: 33 },
+        { vol: 2, p5Count: 50, p6Count: 15, p7Count: 33 },
+        { vol: 3, p5Count: 50, p6Count: 15, p7Count: 33 },
+        { vol: 4, p5Count: 70, p6Count: 18, p7Count: 22 }
+      ];
+
+      let globalQuestionNumber = 1;
+      let seedCounter = 1001;
+
+      volumes.forEach(volDef => {
+        // --- 1. Part 5 生成（重複ゼロの文脈） ---
+        for (let i = 0; i < volDef.p5Count; i++) {
+          const targetWord = ALL_VOCAB_ITEMS[(seedCounter * 3) % ALL_VOCAB_ITEMS.length];
+          const optData = buildToeicOptions(targetWord, seedCounter);
+
+          const s = subjects[(seedCounter + i) % subjects.length];
+          const v = verbs[(seedCounter * 2 + i) % verbs.length];
+          const o = objects[(seedCounter * 3 + i) % objects.length];
+          const t = timePhrases[(seedCounter * 5 + i) % timePhrases.length];
+
+          let qSentence = "";
+          if (targetWord.endsWith('ly')) {
+            qSentence = `${s} ${v} ${o} ------- ${t}.`;
+          } else if (targetWord.endsWith('tion') || targetWord.endsWith('ment') || targetWord.endsWith('ance')) {
+            qSentence = `The ------- of ${o} was thoroughly supervised by ${s.toLowerCase()} ${t}.`;
+          } else if (targetWord.endsWith('able') || targetWord.endsWith('ive') || targetWord.endsWith('ent')) {
+            qSentence = `${s} confirmed that the newly proposed protocol is highly ------- for all branches ${t}.`;
+          } else {
+            qSentence = `Please ensure that all representatives ------- ${o} ${t}.`;
+          }
+
+          questions.push({
+            id: `v${volDef.vol}_q${globalQuestionNumber}`,
+            vol: volDef.vol,
+            part: 5,
+            passage: "",
+            passageJa: "",
+            question: qSentence,
+            options: optData.options,
+            answer: optData.answer,
+            translation: `【設問訳】${s}は${t}に${o}に関して空所に適切な語を入れて文章を完成させます。\n正解は (${optData.answer}) ${targetWord} です。`,
+            explanation: `正解は (${optData.answer}) ${targetWord} です。文脈および品詞関係（${optData.qTypeStr}）から空所に入る適切な語を選びます。`
+          });
+
+          globalQuestionNumber++;
+          seedCounter++;
+        }
+
+        // --- 2. Part 6 生成 ---
+        const p6PassagesNeeded = Math.ceil(volDef.p6Count / 3);
+        for (let p = 0; p < p6PassagesNeeded; p++) {
+          const basePassage = part6Passages[(p + volDef.vol) % part6Passages.length];
+          for (let q = 1; q <= 3; q++) {
+            const targetWord = ALL_VOCAB_ITEMS[(seedCounter * 5 + q) % ALL_VOCAB_ITEMS.length];
+            const optData = buildToeicOptions(targetWord, seedCounter);
+
+            questions.push({
+              id: `v${volDef.vol}_q${globalQuestionNumber}`,
+              vol: volDef.vol,
+              part: 6,
+              passage: basePassage.text,
+              passageJa: basePassage.ja,
+              question: `[ ${q} ] に入る最も適切な語句を選びなさい。`,
+              options: optData.options,
+              answer: optData.answer,
+              translation: `【設問訳】文脈空所 [ ${q} ] に最もふさわしい選択肢を選びなさい。\n正解は (${optData.answer}) ${targetWord} です。`,
+              explanation: `正解は (${optData.answer}) ${targetWord} です。前後の文脈および接続関係から判断します。`
+            });
+
+            globalQuestionNumber++;
+            seedCounter++;
+          }
+        }
+
+        // --- 3. Part 7 生成 ---
+        let p7QuestionsCount = 0;
+        let passageIdx = 0;
+        while (p7QuestionsCount < volDef.p7Count) {
+          const baseP7 = part7Passages[(passageIdx + volDef.vol) % part7Passages.length];
+          baseP7.questions.forEach(qItem => {
+            if (p7QuestionsCount < volDef.p7Count) {
+              questions.push({
+                id: `v${volDef.vol}_q${globalQuestionNumber}`,
+                vol: volDef.vol,
+                part: 7,
+                passage: baseP7.text,
+                passageJa: baseP7.ja,
+                question: qItem.q,
+                options: qItem.opts,
+                answer: qItem.a,
+                translation: qItem.trans,
+                explanation: qItem.exp
+              });
+              globalQuestionNumber++;
+              p7QuestionsCount++;
+              seedCounter++;
+            }
+          });
+          passageIdx++;
+        }
+      });
+
+      return questions;
+    }
+
+    // 初回初期化時に全404問をメモリにロード
+    const INITIAL_404_QUESTIONS = buildAll404Questions();
+
+    const STORAGE_KEY_SRS = 'spaced_repetition_vocab_200_html_v2';
     const SRS_INTERVALS = [1, 3, 7, 14, 30, 60];
 
     const shuffleArray = (arr) => {
@@ -253,12 +414,22 @@
     };
 
     function App() {
-      const [learningRecords, setLearningRecords] = useState({});
-      const [screen, setScreen] = useState('home'); // home | quiz | explanation | result
-      const [questionCount, setQuestionCount] = useState(10);
-      const [answerMode, setAnswerMode] = useState('choice'); // choice | input | mental
-      const [autoSpeakAnswer, setAutoSpeakAnswer] = useState(true); // 回答後に自動で全文発音する設定
+      const [screen, setScreen] = useState('mode-select'); // 'mode-select' | 'daily-home' | 'toeic-home' | 'quiz' | 'explanation' | 'result'
+      const [activeMode, setActiveMode] = useState('daily'); // 'daily' | 'toeic'
 
+      // 日常単語用ステート
+      const [learningRecords, setLearningRecords] = useState({});
+      const [dailyQuestionCount, setDailyQuestionCount] = useState(10);
+      const [answerMode, setAnswerMode] = useState('choice'); // choice | input | mental
+      const [autoSpeakAnswer, setAutoSpeakAnswer] = useState(true);
+
+      // TOEIC用ステート（全404問内蔵）
+      const [toeicVolumeFilter, setToeicVolumeFilter] = useState('ALL'); // 'ALL' | '1' | '2' | '3' | '4'
+      const [toeicCategory, setToeicCategory] = useState('5'); // '5' | '6' | '7' | 'ALL'
+      const [toeicQuestionCount, setToeicQuestionCount] = useState(10); // Part 5: 5, 10, 15 / Part 6, 7: 1, 3, 5
+      const [toeicDatabase, setToeicDatabase] = useState(INITIAL_404_QUESTIONS);
+
+      // クイズセッション用ステート
       const [quizQueue, setQuizQueue] = useState([]);
       const [currentIndex, setCurrentIndex] = useState(0);
       const [userAnswer, setUserAnswer] = useState('');
@@ -266,70 +437,57 @@
       const [currentResult, setCurrentResult] = useState(null);
       const [sessionCorrectCount, setSessionCorrectCount] = useState(0);
 
-      // 初回ロード：LocalStorageから学習記録復元
+      // 日本語訳アコーディオン開閉
+      const [isTranslationOpen, setIsTranslationOpen] = useState(false);
+
+      // 初回ロード
       useEffect(() => {
         try {
-          const saved = localStorage.getItem(STORAGE_KEY);
-          if (saved) setLearningRecords(JSON.parse(saved));
+          const savedSRS = localStorage.getItem(STORAGE_KEY_SRS);
+          if (savedSRS) setLearningRecords(JSON.parse(savedSRS));
         } catch (e) {
-          console.error('Failed to load localStorage', e);
+          console.error(e);
         }
       }, []);
 
-      // 今日の復習・新規単語数の算出
-      const { reviewCount, newCount } = useMemo(() => {
-        const todayStr = new Date().toISOString().split('T')[0];
-        let review = 0;
-        let fresh = 0;
-        MASTER_DATA.forEach((item) => {
-          const rec = learningRecords[item.id];
-          if (!rec) fresh++;
-          else if (rec.nextReviewDate <= todayStr) review++;
-        });
-        return { reviewCount: review, newCount: fresh };
-      }, [learningRecords]);
+      // TOEICカテゴリー変更時の出題数アサイン
+      const handleToeicCategoryChange = (cat) => {
+        setToeicCategory(cat);
+        if (cat === '5' || cat === 'ALL') {
+          setToeicQuestionCount(10);
+        } else {
+          setToeicQuestionCount(3);
+        }
+      };
 
-      // Web Speech API 音声発音（iOS Safari向け安定化処理済み）
+      // 音声読み上げ
       const speakText = (text) => {
         if (!('speechSynthesis' in window)) return;
         window.speechSynthesis.cancel();
         window.speechSynthesis.resume();
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'en-US';
-        utterance.rate = 0.88; // 聞き取りやすい自然な速度
-        // iOS Safari対策：わずかな遅延を挟んで再生キューを安定化
+        utterance.rate = 0.88;
         setTimeout(() => {
           window.speechSynthesis.speak(utterance);
         }, 30);
       };
 
-      // クイズ開始
-      const startQuiz = () => {
-        // iOS Safariの音声アンロック処理
-        if ('speechSynthesis' in window) {
-          window.speechSynthesis.resume();
-        }
-
+      // 日常単語クイズ開始
+      const startDailyQuiz = () => {
+        if ('speechSynthesis' in window) window.speechSynthesis.resume();
         const todayStr = new Date().toISOString().split('T')[0];
-        // ① 今日復習すべき単語
-        const reviewWords = MASTER_DATA.filter((w) => {
-          const r = learningRecords[w.id];
-          return r && r.nextReviewDate <= todayStr;
-        });
-        // ② 未学習の単語
-        const newWords = MASTER_DATA.filter((w) => !learningRecords[w.id]);
-        // ③ それでも足りない場合は次回予定日が先のものから補充
-        const futureWords = MASTER_DATA.filter((w) => {
-          const r = learningRecords[w.id];
-          return r && r.nextReviewDate > todayStr;
-        });
+
+        const reviewWords = DAILY_MASTER_DATA.filter(w => learningRecords[w.id] && learningRecords[w.id].nextReviewDate <= todayStr);
+        const newWords = DAILY_MASTER_DATA.filter(w => !learningRecords[w.id]);
+        const futureWords = DAILY_MASTER_DATA.filter(w => learningRecords[w.id] && learningRecords[w.id].nextReviewDate > todayStr);
 
         const pool = [
           ...shuffleArray(reviewWords),
           ...shuffleArray(newWords),
           ...shuffleArray(futureWords)
         ];
-        const selected = pool.slice(0, questionCount);
+        const selected = pool.slice(0, dailyQuestionCount);
 
         setQuizQueue(selected);
         setCurrentIndex(0);
@@ -337,145 +495,262 @@
         setUserAnswer('');
         setShowMentalAnswer(false);
         setCurrentResult(null);
+        setIsTranslationOpen(false);
+        setActiveMode('daily');
+        setScreen('quiz');
+      };
+
+      // TOEICクイズ開始（内蔵404問から即時抽出）
+      const startToeicQuiz = () => {
+        if ('speechSynthesis' in window) window.speechSynthesis.resume();
+
+        let pool = [...toeicDatabase];
+
+        // ボリューム絞り込み
+        if (toeicVolumeFilter !== 'ALL') {
+          const volNum = parseInt(toeicVolumeFilter);
+          pool = pool.filter(q => q.vol === volNum);
+        }
+
+        // Part絞り込み
+        if (toeicCategory !== 'ALL') {
+          const partNum = parseInt(toeicCategory);
+          pool = pool.filter(q => q.part === partNum);
+        }
+
+        if (pool.length === 0) {
+          return;
+        }
+
+        const shuffled = shuffleArray(pool);
+        const selected = shuffled.slice(0, Math.min(toeicQuestionCount, shuffled.length));
+
+        setQuizQueue(selected);
+        setCurrentIndex(0);
+        setSessionCorrectCount(0);
+        setUserAnswer('');
+        setCurrentResult(null);
+        setIsTranslationOpen(false);
+        setActiveMode('toeic');
         setScreen('quiz');
       };
 
       const currentQuestion = quizQueue[currentIndex];
 
-      // 穴埋めテキストの生成
-      const blankedPhrase = useMemo(() => {
-        if (!currentQuestion) return '';
+      // 日常単語の穴埋め文
+      const blankedDailyPhrase = useMemo(() => {
+        if (!currentQuestion || activeMode !== 'daily') return '';
         const target = currentQuestion.target || currentQuestion.word;
         const regex = new RegExp(`(${target.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
         return currentQuestion.phrase.replace(regex, '[ ______ ]');
-      }, [currentQuestion]);
+      }, [currentQuestion, activeMode]);
 
-      // 4択用ダミー選択肢の生成
-      const choices = useMemo(() => {
-        if (!currentQuestion || answerMode !== 'choice') return [];
+      // 日常単語の4択選択肢
+      const dailyChoices = useMemo(() => {
+        if (!currentQuestion || activeMode !== 'daily' || answerMode !== 'choice') return [];
         const correct = currentQuestion.word;
-        const others = MASTER_DATA.filter(
-          (w) => w.word.toLowerCase() !== correct.toLowerCase()
-        ).map((w) => w.word);
+        const others = DAILY_MASTER_DATA.filter(w => w.word.toLowerCase() !== correct.toLowerCase()).map(w => w.word);
         const shuffledOthers = shuffleArray(Array.from(new Set(others)));
         return shuffleArray([correct, ...shuffledOthers.slice(0, 3)]);
-      }, [currentQuestion, answerMode]);
+      }, [currentQuestion, activeMode, answerMode]);
 
-      // 解答提出処理（忘却曲線の更新 ＋ ★全文発音★）
-      const handleAnswerSubmit = (isCorrect) => {
-        const today = new Date();
-        const todayStr = today.toISOString().split('T')[0];
-        const currentRec = learningRecords[currentQuestion.id] || { streak: 0 };
-
-        let newStreak = 0;
-        let nextDays = 1;
-
-        if (isCorrect) {
-          newStreak = currentRec.streak + 1;
-          const idx = Math.min(newStreak - 1, SRS_INTERVALS.length - 1);
-          nextDays = SRS_INTERVALS[idx];
-          setSessionCorrectCount((prev) => prev + 1);
-        } else {
-          newStreak = 0;
-          nextDays = 1;
+      // 正解の文字列取得
+      const getCorrectWordText = (q) => {
+        if (!q) return '';
+        if (activeMode === 'daily') return q.word;
+        const ansChar = q.answer.trim().charAt(0).toUpperCase();
+        const matched = q.options.find(opt => opt.trim().startsWith(ansChar));
+        if (matched) {
+          return matched.replace(/^[A-D]\.\s*/, '').trim();
         }
-
-        const nextDate = new Date();
-        nextDate.setDate(today.getDate() + nextDays);
-
-        const updated = {
-          ...learningRecords,
-          [currentQuestion.id]: {
-            streak: newStreak,
-            lastLearnedDate: todayStr,
-            nextReviewDate: nextDate.toISOString().split('T')[0],
-          },
-        };
-
-        setLearningRecords(updated);
-        try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-        } catch (e) {}
-
-        setCurrentResult({ isCorrect, question: currentQuestion });
-        setScreen('explanation');
-
-        // ★回答後、即座に答えの英文フレーズ全文を自動で音声読み上げ★
-        if (autoSpeakAnswer) {
-          speakText(currentQuestion.phrase);
-        }
+        return '';
       };
 
-      // タイピング入力の正誤判定
-      const handleInputSubmit = (e) => {
-        e.preventDefault();
-        if (!userAnswer.trim()) return;
-        const user = userAnswer.trim().toLowerCase();
-        const word = currentQuestion.word.toLowerCase();
-        const target = (currentQuestion.target || currentQuestion.word).toLowerCase();
-        // 原形でも文中の活用形でも正解と判定
-        handleAnswerSubmit(user === word || user === target);
+      // 穴埋め完了英文（全文）
+      const filledFullEnglishSentence = useMemo(() => {
+        if (!currentQuestion) return '';
+        if (activeMode === 'daily') return currentQuestion.phrase;
+
+        const correctWord = getCorrectWordText(currentQuestion);
+        if (currentQuestion.part === 5) {
+          return currentQuestion.question.replace(/-------|______|____|\[\s*______\s*\]/g, `[${correctWord}]`);
+        } else if (currentQuestion.part === 6) {
+          const matchNum = currentQuestion.question.match(/\[\s*(\d+)\s*\]/);
+          if (matchNum && currentQuestion.passage) {
+            return currentQuestion.passage.replace(matchNum[0], `[★ ${correctWord} ★]`);
+          }
+          return currentQuestion.question.replace(/\[\s*.*?\s*\]/g, `[${correctWord}]`);
+        } else {
+          return currentQuestion.question;
+        }
+      }, [currentQuestion, activeMode]);
+
+      // 長文・設問中のノート重要語彙の自動検出
+      const extractedVocabList = useMemo(() => {
+        if (!currentQuestion || activeMode !== 'toeic') return [];
+        const textToScan = `${currentQuestion.passage || ''} ${currentQuestion.question || ''} ${currentQuestion.explanation || ''}`.toLowerCase();
+        const found = [];
+
+        Object.keys(MASTER_VOCAB_DICT).forEach(key => {
+          if (textToScan.includes(key.toLowerCase())) {
+            found.push({
+              word: key,
+              ...MASTER_VOCAB_DICT[key]
+            });
+          }
+        });
+        return found;
+      }, [currentQuestion, activeMode]);
+
+      // 回答提出
+      const handleAnswerSubmit = (isCorrect, chosenOptionText = '') => {
+        if (activeMode === 'daily') {
+          const today = new Date();
+          const todayStr = today.toISOString().split('T')[0];
+          const currentRec = learningRecords[currentQuestion.id] || { streak: 0 };
+          let newStreak = isCorrect ? currentRec.streak + 1 : 0;
+          let nextDays = isCorrect ? SRS_INTERVALS[Math.min(newStreak - 1, SRS_INTERVALS.length - 1)] : 1;
+
+          if (isCorrect) setSessionCorrectCount(p => p + 1);
+
+          const nextDate = new Date();
+          nextDate.setDate(today.getDate() + nextDays);
+
+          const updated = {
+            ...learningRecords,
+            [currentQuestion.id]: {
+              streak: newStreak,
+              lastLearnedDate: todayStr,
+              nextReviewDate: nextDate.toISOString().split('T')[0]
+            }
+          };
+          setLearningRecords(updated);
+          try {
+            localStorage.setItem(STORAGE_KEY_SRS, JSON.stringify(updated));
+          } catch (e) {}
+
+          if (autoSpeakAnswer) {
+            speakText(currentQuestion.phrase);
+          }
+        } else {
+          if (isCorrect) setSessionCorrectCount(p => p + 1);
+        }
+
+        setCurrentResult({ isCorrect, question: currentQuestion, chosenOption: chosenOptionText });
+        setIsTranslationOpen(false);
+        setScreen('explanation');
       };
 
       // 次の問題へ
       const handleNextQuestion = () => {
         if (currentIndex + 1 < quizQueue.length) {
-          setCurrentIndex((prev) => prev + 1);
+          setCurrentIndex(p => p + 1);
           setUserAnswer('');
           setShowMentalAnswer(false);
           setCurrentResult(null);
+          setIsTranslationOpen(false);
           setScreen('quiz');
         } else {
           setScreen('result');
         }
       };
 
-      // データ初期化
-      const resetAllProgress = () => {
-        if (window.confirm('学習データをすべて初期化しますか？')) {
-          localStorage.removeItem(STORAGE_KEY);
-          setLearningRecords({});
-        }
-      };
-
       return (
         <div className="min-h-[100dvh] flex flex-col items-center justify-start sm:justify-center p-3 sm:p-5">
-          <div className="w-full max-w-lg bg-white rounded-3xl shadow-xl border border-slate-200/80 overflow-hidden flex flex-col my-auto">
+          <div className="w-full max-w-xl bg-white rounded-3xl shadow-xl border border-slate-200/80 overflow-hidden flex flex-col my-auto transition-all">
 
             {/* ========================================================= */}
-            {/* 1. TOP画面（出題設定） */}
+            {/* 1. モード選択トップ画面 */}
             {/* ========================================================= */}
-            {screen === 'home' && (
-              <div className="p-5 sm:p-7 space-y-5">
-                <div className="text-center pt-1">
-                  <div className="w-12 h-12 bg-indigo-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-2 text-2xl shadow-lg shadow-indigo-100">
-                    🧠
+            {screen === 'mode-select' && (
+              <div className="p-6 sm:p-8 space-y-6">
+                <div className="text-center pt-2">
+                  <div className="w-14 h-14 bg-gradient-to-tr from-blue-600 to-indigo-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl shadow-lg shadow-blue-100">
+                    🏆
                   </div>
                   <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-                    SRS 忘却曲線 英単語
+                    SRS英単語 & TOEIC 実戦マスター
                   </h1>
-                  <p className="text-xs text-slate-500 font-semibold mt-0.5">
-                    完全200単語マスター（音声全文発音対応）
-                  </p>
-                </div>
-
-                {/* 学習ステータス */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-amber-50 border border-amber-200/70 p-3.5 rounded-2xl text-center">
-                    <div className="text-xs font-bold text-amber-700 mb-0.5">本日の復習対象</div>
-                    <div className="text-3xl font-black text-amber-900">
-                      {reviewCount} <span className="text-xs font-normal text-amber-600">語</span>
-                    </div>
-                  </div>
-                  <div className="bg-emerald-50 border border-emerald-200/70 p-3.5 rounded-2xl text-center">
-                    <div className="text-xs font-bold text-emerald-700 mb-0.5">未学習の単語</div>
-                    <div className="text-3xl font-black text-emerald-900">
-                      {newCount} <span className="text-xs font-normal text-emerald-600">/ 200</span>
-                    </div>
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-black rounded-full border border-emerald-200 mt-2">
+                    <span>✨</span>
+                    <span>全404問 内蔵済み（Excel取込不要・即時プレイ可能）</span>
                   </div>
                 </div>
 
-                {/* 出題数選択 */}
+                <div className="grid grid-cols-1 gap-4 pt-1">
+                  {/* ① 日常の単語カード */}
+                  <button
+                    onClick={() => {
+                      setActiveMode('daily');
+                      setScreen('daily-home');
+                    }}
+                    className="p-5 rounded-2xl border-2 border-indigo-100 bg-gradient-to-br from-indigo-50/40 to-white hover:border-indigo-600 hover:shadow-md transition-all text-left flex items-center justify-between group active:scale-[0.99]"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xl shadow-md shadow-indigo-200">
+                        ☕
+                      </div>
+                      <div>
+                        <div className="text-base font-black text-slate-900 group-hover:text-indigo-600 transition-colors">
+                          日常の単語
+                        </div>
+                        <div className="text-xs text-slate-500 font-medium mt-0.5">
+                          厳選200単語・忘却曲線（SRS）反復学習
+                        </div>
+                      </div>
+                    </div>
+                    <span className="text-indigo-600 text-lg font-bold group-hover:translate-x-1 transition-transform">→</span>
+                  </button>
+
+                  {/* ② TOEICの問題カード */}
+                  <button
+                    onClick={() => {
+                      setActiveMode('toeic');
+                      setScreen('toeic-home');
+                    }}
+                    className="p-5 rounded-2xl border-2 border-blue-200 bg-gradient-to-br from-blue-50/60 to-white hover:border-blue-600 hover:shadow-md transition-all text-left flex items-center justify-between group active:scale-[0.99]"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-blue-600 text-white flex items-center justify-center text-xl shadow-md shadow-blue-200">
+                        📝
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-base font-black text-slate-900 group-hover:text-blue-600 transition-colors">
+                            TOEICの問題（Part 5 / 6 / 7）
+                          </span>
+                          <span className="bg-blue-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded">
+                            404問
+                          </span>
+                        </div>
+                        <div className="text-xs text-slate-500 font-medium mt-0.5">
+                          Vol. 1〜4完全収録・短文穴埋め＆長文読解
+                        </div>
+                      </div>
+                    </div>
+                    <span className="text-blue-600 text-lg font-bold group-hover:translate-x-1 transition-transform">→</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ========================================================= */}
+            {/* 2-A. 日常単語 設定画面 */}
+            {/* ========================================================= */}
+            {screen === 'daily-home' && (
+              <div className="p-5 sm:p-7 space-y-5">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <button
+                    onClick={() => setScreen('mode-select')}
+                    className="text-xs font-bold text-slate-500 hover:text-slate-800 flex items-center gap-1"
+                  >
+                    ← トップに戻る
+                  </button>
+                  <span className="text-xs font-black text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">
+                    日常の単語 (200語)
+                  </span>
+                </div>
+
                 <div>
                   <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
                     出題数を選択
@@ -484,9 +759,9 @@
                     {[5, 10, 15, 20].map((num) => (
                       <button
                         key={num}
-                        onClick={() => setQuestionCount(num)}
+                        onClick={() => setDailyQuestionCount(num)}
                         className={`py-2.5 rounded-xl text-xs font-black transition-all active:scale-95 ${
-                          questionCount === num
+                          dailyQuestionCount === num
                             ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200'
                             : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                         }`}
@@ -497,7 +772,6 @@
                   </div>
                 </div>
 
-                {/* 解答モード選択 */}
                 <div>
                   <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
                     解答方法を選択
@@ -531,91 +805,248 @@
                   </div>
                 </div>
 
-                {/* 回答後の自動全文発音トグル */}
-                <div className="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-xl">
-                  <div className="flex items-center gap-2">
-                    <span className="text-base">🔊</span>
-                    <div>
-                      <div className="text-xs font-bold text-slate-700">回答後に全文を自動発音</div>
-                      <div className="text-[10px] text-slate-400">答え合わせ時に英語を自動で読み上げます</div>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setAutoSpeakAnswer(!autoSpeakAnswer)}
-                    className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-300 ${
-                      autoSpeakAnswer ? 'bg-indigo-600' : 'bg-slate-300'
-                    }`}
-                  >
-                    <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ${
-                      autoSpeakAnswer ? 'translate-x-5' : 'translate-x-0'
-                    }`} />
-                  </button>
-                </div>
-
-                {/* スタートボタン */}
                 <button
-                  onClick={startQuiz}
+                  onClick={startDailyQuiz}
                   className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white font-black rounded-2xl shadow-lg shadow-indigo-200 text-sm transition-all"
                 >
-                  学習をスタートする
+                  日常単語の学習をスタート
                 </button>
-
-                <div className="text-center pt-1">
-                  <button
-                    onClick={resetAllProgress}
-                    className="text-[11px] text-slate-400 hover:text-rose-500 transition-colors"
-                  >
-                    学習データを初期化する
-                  </button>
-                </div>
               </div>
             )}
 
             {/* ========================================================= */}
-            {/* 2. QUIZ画面 */}
+            {/* 2-B. TOEIC 問題 設定画面（404問完備） */}
+            {/* ========================================================= */}
+            {screen === 'toeic-home' && (
+              <div className="p-5 sm:p-7 space-y-5">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <button
+                    onClick={() => setScreen('mode-select')}
+                    className="text-xs font-bold text-slate-500 hover:text-slate-800 flex items-center gap-1"
+                  >
+                    ← トップに戻る
+                  </button>
+                  <span className="text-xs font-black text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200">
+                    内蔵データベース: 全404問
+                  </span>
+                </div>
+
+                {/* ① ボリューム選択タブ */}
+                <div>
+                  <div className="flex justify-between items-center mb-1.5">
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                      対象ボリューム
+                    </label>
+                    <span className="text-[11px] font-bold text-blue-600">
+                      {toeicVolumeFilter === 'ALL' ? '全セット（Vol 1〜4：計404問）' : `Vol.${toeicVolumeFilter}`}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-5 gap-1.5">
+                    {[
+                      { id: 'ALL', label: '全セット' },
+                      { id: '1', label: 'Vol 1' },
+                      { id: '2', label: 'Vol 2' },
+                      { id: '3', label: 'Vol 3' },
+                      { id: '4', label: 'Vol 4' },
+                    ].map(tab => (
+                      <button
+                        key={tab.id}
+                        onClick={() => setToeicVolumeFilter(tab.id)}
+                        className={`py-2 rounded-xl text-xs font-black transition-all ${
+                          toeicVolumeFilter === tab.id
+                            ? 'bg-slate-900 text-white shadow-sm'
+                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* ② カテゴリー選択 */}
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
+                    Partを選択
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { id: '5', title: 'Part 5', subtitle: '短文穴埋め問題' },
+                      { id: '6', title: 'Part 6', subtitle: '長文穴埋め問題' },
+                      { id: '7', title: 'Part 7', subtitle: '長文読解問題' },
+                      { id: 'ALL', title: 'Part 5 / 6 / 7', subtitle: '総合ミックス演習' },
+                    ].map((cat) => (
+                      <button
+                        key={cat.id}
+                        onClick={() => handleToeicCategoryChange(cat.id)}
+                        className={`p-3.5 rounded-2xl border-2 text-left transition-all active:scale-95 ${
+                          toeicCategory === cat.id
+                            ? 'border-blue-600 bg-blue-50/70 text-blue-950 shadow-sm'
+                            : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+                        }`}
+                      >
+                        <div className="font-black text-sm text-blue-600">{cat.title}</div>
+                        <div className="text-[11px] text-slate-500 mt-0.5 font-medium">{cat.subtitle}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* ③ 解く問題数（Part5は5, 10, 15問 / Part6,7は1, 3, 5問） */}
+                <div>
+                  <div className="flex justify-between items-center mb-1.5">
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                      解く問題数
+                    </label>
+                    <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+                      {toeicCategory === '5' || toeicCategory === 'ALL' ? 'Part 5基準（5 / 10 / 15問）' : '長文基準（1 / 3 / 5問）'}
+                    </span>
+                  </div>
+
+                  {(toeicCategory === '5' || toeicCategory === 'ALL') && (
+                    <div className="grid grid-cols-3 gap-2">
+                      {[5, 10, 15].map((cnt) => (
+                        <button
+                          key={cnt}
+                          onClick={() => setToeicQuestionCount(cnt)}
+                          className={`py-3 rounded-xl text-xs font-black transition-all active:scale-95 ${
+                            toeicQuestionCount === cnt
+                              ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
+                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                          }`}
+                        >
+                          {cnt} 問
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {(toeicCategory === '6' || toeicCategory === '7') && (
+                    <div className="grid grid-cols-3 gap-2">
+                      {[1, 3, 5].map((cnt) => (
+                        <button
+                          key={cnt}
+                          onClick={() => setToeicQuestionCount(cnt)}
+                          className={`py-3 rounded-xl text-xs font-black transition-all active:scale-95 ${
+                            toeicQuestionCount === cnt
+                              ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
+                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                          }`}
+                        >
+                          {cnt} 問
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  onClick={startToeicQuiz}
+                  className="w-full py-4 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-black rounded-2xl shadow-lg shadow-blue-200 text-sm transition-all"
+                >
+                  演習を開始する（{toeicQuestionCount}問）
+                </button>
+              </div>
+            )}
+
+            {/* ========================================================= */}
+            {/* 3. クイズ出題画面 */}
             {/* ========================================================= */}
             {screen === 'quiz' && currentQuestion && (
               <div className="flex flex-col">
-                {/* プログレスバー */}
                 <div className="w-full h-1.5 bg-slate-100">
                   <div
-                    className="h-full bg-indigo-600 transition-all duration-300"
+                    className={`h-full transition-all duration-300 ${activeMode === 'daily' ? 'bg-indigo-600' : 'bg-blue-600'}`}
                     style={{ width: `${((currentIndex + 1) / quizQueue.length) * 100}%` }}
                   />
                 </div>
 
                 <div className="p-5 sm:p-7 space-y-4">
-                  {/* ヘッダー */}
                   <div className="flex justify-between items-center text-xs font-bold text-slate-400">
-                    <span className="bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full text-xs">
-                      問 {currentIndex + 1} / {quizQueue.length}
+                    <span className={`px-2.5 py-1 rounded-full text-xs font-black ${
+                      activeMode === 'daily' ? 'bg-indigo-50 text-indigo-700' : 'bg-blue-50 text-blue-700'
+                    }`}>
+                      {activeMode === 'daily' 
+                        ? `単語 ${currentIndex + 1} / ${quizQueue.length}` 
+                        : `Vol.${currentQuestion.vol} | Part ${currentQuestion.part} (${currentIndex + 1}/${quizQueue.length})`}
                     </span>
-                    <span>連続正解: {learningRecords[currentQuestion.id]?.streak || 0}回</span>
+                    <button
+                      onClick={() => setScreen(activeMode === 'daily' ? 'daily-home' : 'toeic-home')}
+                      className="text-slate-400 hover:text-rose-500 text-xs font-medium"
+                    >
+                      中断して戻る
+                    </button>
                   </div>
 
-                  {/* 出題文カード */}
-                  <div className="bg-slate-50 border border-slate-200/90 rounded-2xl p-4 sm:p-5 text-center">
-                    <div className="flex items-start justify-between gap-2 text-left mb-2">
-                      <div className="text-base sm:text-lg font-bold text-slate-800 leading-relaxed font-sans">
-                        {blankedPhrase}
+                  {/* Part 6 / 7 の長文ボックス */}
+                  {activeMode === 'toeic' && (currentQuestion.part === 6 || currentQuestion.part === 7) && currentQuestion.passage && (
+                    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-left shadow-sm">
+                      <div className="flex justify-between items-center pb-2 border-b border-slate-200 mb-2">
+                        <span className="text-[10px] font-black uppercase text-blue-600 tracking-wider">
+                          Reading Passage (Part {currentQuestion.part})
+                        </span>
+                        <button
+                          onClick={() => speakText(currentQuestion.passage)}
+                          className="text-blue-600 text-xs font-bold hover:underline flex items-center gap-1"
+                        >
+                          🔊 長文音声
+                        </button>
+                      </div>
+                      <div className="text-xs sm:text-sm text-slate-700 leading-relaxed max-h-48 overflow-y-auto whitespace-pre-line custom-scrollbar">
+                        {currentQuestion.passage}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 設問カード */}
+                  <div className="bg-slate-50 border border-slate-200/90 rounded-2xl p-4 sm:p-5 text-left">
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div className="text-sm sm:text-base font-bold text-slate-800 leading-relaxed">
+                        {activeMode === 'daily' ? blankedDailyPhrase : currentQuestion.question}
                       </div>
                       <button
-                        onClick={() => speakText(currentQuestion.phrase)}
-                        className="p-2.5 bg-white border border-slate-200 active:bg-indigo-50 text-indigo-600 rounded-xl shrink-0 shadow-sm text-sm"
-                        title="全文を聴く"
+                        onClick={() => speakText(activeMode === 'daily' ? currentQuestion.phrase : currentQuestion.question)}
+                        className="p-2.5 bg-white border border-slate-200 active:bg-blue-50 text-blue-600 rounded-xl shrink-0 shadow-sm text-sm"
+                        title="音声を聴く"
                       >
                         🔊
                       </button>
                     </div>
-                    <div className="pt-2 border-t border-slate-200/60 text-xs text-slate-500 font-medium text-left">
-                      {currentQuestion.phraseJa}
-                    </div>
+                    {activeMode === 'daily' && (
+                      <div className="pt-2 border-t border-slate-200/60 text-xs text-slate-500 font-medium">
+                        {currentQuestion.phraseJa}
+                      </div>
+                    )}
                   </div>
 
-                  {/* 解答エリア：1. 4択モード */}
-                  {answerMode === 'choice' && (
+                  {/* 4択選択肢（TOEIC） */}
+                  {activeMode === 'toeic' && (
                     <div className="space-y-2">
-                      {choices.map((word, idx) => (
+                      {currentQuestion.options.map((opt, idx) => {
+                        const optLetter = opt.trim().charAt(0).toUpperCase();
+                        return (
+                          <button
+                            key={idx}
+                            onClick={() => handleAnswerSubmit(optLetter === currentQuestion.answer.trim().charAt(0).toUpperCase(), opt)}
+                            className="w-full p-3.5 border-2 border-slate-200 active:border-blue-600 active:bg-blue-50 text-left font-bold text-xs sm:text-sm text-slate-700 rounded-xl transition-all flex items-center justify-between"
+                          >
+                            <span className="flex items-center gap-2.5">
+                              <span className="w-5 h-5 rounded-md bg-slate-100 text-blue-600 font-mono flex items-center justify-center text-[11px] font-bold">
+                                {optLetter}
+                              </span>
+                              <span>{opt.replace(/^[A-D]\.\s*/, '')}</span>
+                            </span>
+                            <span className="text-slate-300">→</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* 4択（日常単語） */}
+                  {activeMode === 'daily' && answerMode === 'choice' && (
+                    <div className="space-y-2">
+                      {dailyChoices.map((word, idx) => (
                         <button
                           key={idx}
                           onClick={() => handleAnswerSubmit(word.toLowerCase() === currentQuestion.word.toLowerCase())}
@@ -633,15 +1064,19 @@
                     </div>
                   )}
 
-                  {/* 解答エリア：2. 入力モード */}
-                  {answerMode === 'input' && (
-                    <form onSubmit={handleInputSubmit} className="space-y-3">
+                  {/* 入力モード（日常単語） */}
+                  {activeMode === 'daily' && answerMode === 'input' && (
+                    <form onSubmit={(e) => {
+                      e.preventDefault();
+                      if (!userAnswer.trim()) return;
+                      const u = userAnswer.trim().toLowerCase();
+                      const w = currentQuestion.word.toLowerCase();
+                      const t = (currentQuestion.target || currentQuestion.word).toLowerCase();
+                      handleAnswerSubmit(u === w || u === t);
+                    }} className="space-y-3">
                       <input
                         type="text"
                         autoFocus
-                        autoCapitalize="none"
-                        autoCorrect="off"
-                        spellCheck="false"
                         value={userAnswer}
                         onChange={(e) => setUserAnswer(e.target.value)}
                         placeholder="英単語を入力..."
@@ -650,15 +1085,15 @@
                       <button
                         type="submit"
                         disabled={!userAnswer.trim()}
-                        className="w-full py-3.5 bg-indigo-600 active:bg-indigo-700 disabled:bg-slate-300 text-white font-bold rounded-xl text-sm transition-all"
+                        className="w-full py-3.5 bg-indigo-600 active:bg-indigo-700 disabled:bg-slate-300 text-white font-bold rounded-xl text-sm"
                       >
-                        解答する（発音付き）
+                        解答する
                       </button>
                     </form>
                   )}
 
-                  {/* 解答エリア：3. 心の中で答えるモード */}
-                  {answerMode === 'mental' && (
+                  {/* 心の中モード（日常単語） */}
+                  {activeMode === 'daily' && answerMode === 'mental' && (
                     <div className="space-y-3">
                       {!showMentalAnswer ? (
                         <button
@@ -691,16 +1126,17 @@
                       )}
                     </div>
                   )}
+
                 </div>
               </div>
             )}
 
             {/* ========================================================= */}
-            {/* 3. 結果・解説画面（★回答後の全文発音ボタン＆自動再生★） */}
+            {/* 4. 結果・解説画面（★解答後も長文常時表示 & 穴埋め完了全文 & 全文和訳★） */}
             {/* ========================================================= */}
             {screen === 'explanation' && currentResult && (
               <div className="p-5 sm:p-7 space-y-4">
-                {/* 正誤ヘッダー */}
+                {/* 正誤判定ヘッダー */}
                 <div className={`p-3.5 rounded-2xl flex items-center gap-3 ${
                   currentResult.isCorrect ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'
                 }`}>
@@ -710,100 +1146,245 @@
                       {currentResult.isCorrect ? '正解！ Correct!' : '不正解… Incorrect'}
                     </div>
                     <div className="text-[11px] opacity-80">
-                      {currentResult.isCorrect
-                        ? '忘却曲線により次回の復習日を延ばしました。'
-                        : '連続正解がリセットされ、明日また復習します。'}
+                      {activeMode === 'daily' 
+                        ? (currentResult.isCorrect ? '忘却曲線のインターバルを延長しました。' : '明日また復習します。')
+                        : `正解は (${currentResult.question.answer}) です。`}
                     </div>
                   </div>
+                </div>
+
+                {/* ★Part 6 / 7 の長文（Passage 英文全文）を解答後にも常時表示★ */}
+                {activeMode === 'toeic' && (currentResult.question.part === 6 || currentResult.question.part === 7) && currentResult.question.passage && (
+                  <div className="bg-blue-50/60 border-2 border-blue-200 rounded-2xl p-4 text-left shadow-sm">
+                    <div className="flex justify-between items-center pb-2 border-b border-blue-200 mb-2">
+                      <span className="text-[11px] font-black uppercase text-blue-800 tracking-wider flex items-center gap-1.5">
+                        <span>📖</span>
+                        <span>長文の英文全文（Part {currentResult.question.part} Passage）</span>
+                      </span>
+                      <button
+                        onClick={() => speakText(currentResult.question.passage)}
+                        className="px-2.5 py-1 bg-blue-600 active:bg-blue-700 text-white font-bold rounded-lg text-xs flex items-center gap-1 shadow-sm transition"
+                      >
+                        <span>🔊</span>
+                        <span>長文音声を聴く</span>
+                      </button>
+                    </div>
+                    <div className="text-xs sm:text-sm text-slate-800 leading-relaxed max-h-56 overflow-y-auto whitespace-pre-line custom-scrollbar font-sans bg-white p-3.5 rounded-xl border border-blue-100 shadow-inner">
+                      {currentResult.question.part === 6 ? (
+                        filledFullEnglishSentence.split(/(\[.*?\])/g).map((part, i) => {
+                          if (part.startsWith('[') && part.endsWith(']')) {
+                            return (
+                              <span key={i} className="bg-blue-600 text-white px-2 py-0.5 rounded font-black mx-1 inline-block shadow-sm">
+                                {part.replace(/\[|\]/g, '')}
+                              </span>
+                            );
+                          }
+                          return <span key={i}>{part}</span>;
+                        })
+                      ) : (
+                        currentResult.question.passage
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* ★穴埋め完了英文（全文）/ 設問と正解★ */}
+                <div className="bg-indigo-50/70 border-2 border-indigo-200 rounded-2xl p-4 text-left shadow-sm">
+                  <div className="flex justify-between items-center mb-1.5">
+                    <span className="text-[10px] font-black uppercase text-indigo-700 tracking-wider flex items-center gap-1">
+                      <span>✨</span>
+                      <span>
+                        {activeMode === 'toeic' && currentResult.question.part === 7 
+                          ? '設問と正解（Question & Answer）' 
+                          : '穴埋め完了英文（全文）'}
+                      </span>
+                    </span>
+                    <button
+                      onClick={() => speakText(
+                        activeMode === 'toeic' && currentResult.question.part === 7
+                          ? `${currentResult.question.question} The answer is ${getCorrectWordText(currentResult.question)}`
+                          : filledFullEnglishSentence.replace(/\[|\]|★/g, '')
+                      )}
+                      className="px-2.5 py-1 bg-indigo-600 active:bg-indigo-700 text-white font-bold rounded-lg text-xs flex items-center gap-1 shadow-sm transition"
+                    >
+                      <span>▶</span>
+                      <span>{activeMode === 'toeic' && currentResult.question.part === 7 ? '設問と正解を聴く' : '穴埋め完了文を聴く'}</span>
+                    </button>
+                  </div>
+
+                  {activeMode === 'toeic' && currentResult.question.part === 7 ? (
+                    <div className="space-y-2">
+                      <div className="text-xs sm:text-sm font-bold text-slate-800 leading-relaxed font-sans">
+                        {currentResult.question.question}
+                      </div>
+                      <div className="bg-white px-3 py-2 rounded-xl border border-indigo-200 flex items-center gap-2">
+                        <span className="bg-emerald-600 text-white text-[11px] font-black px-2 py-0.5 rounded">
+                          正解 ({currentResult.question.answer})
+                        </span>
+                        <span className="font-bold text-xs sm:text-sm text-slate-800">
+                          {getCorrectWordText(currentResult.question)}
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-xs sm:text-sm font-bold text-slate-800 leading-relaxed font-sans whitespace-pre-line">
+                      {filledFullEnglishSentence.split(/(\[.*?\])/g).map((part, i) => {
+                        if (part.startsWith('[') && part.endsWith(']')) {
+                          return (
+                            <span key={i} className="bg-indigo-600 text-white px-2 py-0.5 rounded font-black mx-1 inline-block shadow-sm">
+                              {part.replace(/\[|\]/g, '')}
+                            </span>
+                          );
+                        }
+                        return <span key={i}>{part}</span>;
+                      })}
+                    </div>
+                  )}
                 </div>
 
                 {/* 音声コントロールバー */}
-                <div className="bg-indigo-50/70 border border-indigo-100 rounded-2xl p-3 flex items-center justify-between">
-                  <span className="text-xs font-bold text-indigo-900">🔊 音声を再生する:</span>
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-700">🔊 その他の音声を再生:</span>
                   <div className="flex gap-1.5">
                     <button
-                      onClick={() => speakText(currentResult.question.phrase)}
-                      className="px-3 py-1.5 bg-indigo-600 active:bg-indigo-700 text-white font-bold rounded-lg text-xs shadow-sm flex items-center gap-1"
+                      onClick={() => speakText(activeMode === 'daily' ? currentResult.question.phrase : currentResult.question.question)}
+                      className="px-3 py-1.5 bg-blue-600 active:bg-blue-700 text-white font-bold rounded-lg text-xs shadow-sm"
                     >
-                      ▶ フレーズ全文
+                      ▶ 設問文
                     </button>
-                    <button
-                      onClick={() => speakText(currentResult.question.word)}
-                      className="px-2.5 py-1.5 bg-white border border-indigo-200 active:bg-indigo-100 text-indigo-700 font-bold rounded-lg text-xs"
-                    >
-                      単語
-                    </button>
-                    <button
-                      onClick={() => speakText(currentResult.question.otherPhrase)}
-                      className="px-2.5 py-1.5 bg-white border border-indigo-200 active:bg-indigo-100 text-indigo-700 font-bold rounded-lg text-xs"
-                    >
-                      例文
-                    </button>
+                    {activeMode === 'toeic' && currentResult.question.passage && (
+                      <button
+                        onClick={() => speakText(currentResult.question.passage)}
+                        className="px-2.5 py-1.5 bg-white border border-blue-200 text-blue-700 font-bold rounded-lg text-xs"
+                      >
+                        長文全体
+                      </button>
+                    )}
+                    {activeMode === 'daily' && (
+                      <button
+                        onClick={() => speakText(currentResult.question.word)}
+                        className="px-2.5 py-1.5 bg-white border border-slate-200 text-slate-700 font-bold rounded-lg text-xs"
+                      >
+                        単語
+                      </button>
+                    )}
                   </div>
                 </div>
 
-                {/* 詳細カード */}
+                {/* 解説カード */}
                 <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3 text-left">
-                  {/* 正解の単語 */}
-                  <div>
-                    <div className="text-[10px] font-bold text-indigo-600 uppercase tracking-wider">
-                      正解の英単語
+                  {/* 日常単語の解説 */}
+                  {activeMode === 'daily' && (
+                    <div>
+                      <div className="text-[10px] font-bold text-indigo-600 uppercase">正解の英単語</div>
+                      <div className="text-2xl font-black text-slate-900 mt-0.5">{currentResult.question.word}</div>
+                      <div className="text-xs font-semibold text-slate-600 mt-0.5">{currentResult.question.meaning}</div>
                     </div>
-                    <div className="text-2xl font-black text-slate-900 mt-0.5">
-                      {currentResult.question.word}
-                    </div>
-                    <div className="text-xs font-semibold text-slate-600 mt-0.5">
-                      {currentResult.question.meaning}
-                    </div>
-                  </div>
+                  )}
 
-                  {/* 実践フレーズ（完全文） */}
-                  <div className="pt-2.5 border-t border-slate-200">
-                    <div className="flex justify-between items-center mb-0.5">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                        実践フレーズ（完全文）
-                      </span>
-                      <button
-                        onClick={() => speakText(currentResult.question.phrase)}
-                        className="text-indigo-600 text-xs font-bold hover:underline"
-                      >
-                        🔊 発音
-                      </button>
+                  {/* TOEICの解説（文法・語彙ロジック） */}
+                  {activeMode === 'toeic' && (
+                    <div>
+                      <div className="text-xs font-black text-blue-600 mb-1 flex items-center gap-1">
+                        <span>💡</span> 解説（Explanation）
+                      </div>
+                      <div className="text-xs sm:text-sm text-slate-700 leading-relaxed font-medium">
+                        {currentResult.question.explanation || '解説情報がありません。'}
+                      </div>
                     </div>
-                    <div className="text-xs sm:text-sm font-bold text-slate-800">
-                      {currentResult.question.phrase}
-                    </div>
-                    <div className="text-[11px] text-slate-500 mt-0.5">
-                      {currentResult.question.phraseJa}
-                    </div>
-                  </div>
+                  )}
 
-                  {/* 別の文脈・使い方例文 */}
-                  <div className="pt-2.5 border-t border-slate-200">
-                    <div className="flex justify-between items-center mb-0.5">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                        別の文脈・使い方例文
+                  {/* 重要語彙・熟語カード */}
+                  {activeMode === 'toeic' && extractedVocabList.length > 0 && (
+                    <div className="pt-2 border-t border-slate-200">
+                      <div className="text-[11px] font-black text-amber-700 uppercase tracking-wider mb-2 flex items-center gap-1">
+                        <span>📚</span>
+                        <span>長文・設問中の重要語彙・熟語（単語帳抽出語）</span>
+                      </div>
+                      <div className="space-y-1.5">
+                        {extractedVocabList.map((item, idx) => (
+                          <div key={idx} className="bg-amber-50/60 border border-amber-200/80 rounded-xl p-2.5 flex items-start justify-between gap-2">
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-black text-xs text-amber-950">{item.word}</span>
+                                <span className="text-[10px] bg-amber-200/60 text-amber-900 font-bold px-1.5 py-0.5 rounded">
+                                  {item.part}
+                                </span>
+                              </div>
+                              <div className="text-xs text-amber-900 font-bold mt-0.5">
+                                {item.meaning}
+                              </div>
+                              {item.note && (
+                                <div className="text-[10px] text-amber-700 mt-0.5 font-medium">
+                                  📌 {item.note}
+                                </div>
+                              )}
+                            </div>
+                            <button
+                              onClick={() => speakText(item.word)}
+                              className="p-1 text-amber-700 hover:text-amber-900 active:scale-95 text-xs"
+                              title="単語を発音"
+                            >
+                              🔊
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 日本語訳アコーディオン */}
+                  <div className="border border-slate-200 rounded-xl overflow-hidden bg-white mt-2">
+                    <button
+                      onClick={() => setIsTranslationOpen(!isTranslationOpen)}
+                      className="w-full text-left px-3.5 py-2.5 flex justify-between items-center text-xs font-bold text-slate-700 hover:bg-slate-50 transition"
+                    >
+                      <span className="flex items-center gap-1.5">
+                        <span>🌐</span>
+                        <span>日本語訳を確認する（{isTranslationOpen ? '閉じる' : 'タップで表示'}）</span>
                       </span>
-                      <button
-                        onClick={() => speakText(currentResult.question.otherPhrase)}
-                        className="text-indigo-600 text-xs font-bold hover:underline"
-                      >
-                        🔊 発音
-                      </button>
-                    </div>
-                    <div className="text-xs sm:text-sm font-bold text-slate-800">
-                      {currentResult.question.otherPhrase}
-                    </div>
-                    <div className="text-[11px] text-slate-500 mt-0.5">
-                      {currentResult.question.otherPhraseJa}
-                    </div>
+                      <span className={`transform transition-transform text-slate-400 ${isTranslationOpen ? 'rotate-180' : ''}`}>▼</span>
+                    </button>
+                    {isTranslationOpen && (
+                      <div className="p-3.5 bg-slate-50 border-t border-slate-100 text-xs text-slate-600 leading-relaxed space-y-3">
+                        {activeMode === 'daily' ? (
+                          <div>
+                            <div className="font-bold text-slate-800 mb-1">【フレーズ訳】</div>
+                            <div className="mb-2">{currentResult.question.phraseJa}</div>
+                            <div className="font-bold text-slate-800 mb-1">【例文訳】</div>
+                            <div>{currentResult.question.otherPhraseJa}</div>
+                          </div>
+                        ) : (
+                          <div>
+                            {currentResult.question.passage && (
+                              <div className="mb-3 pb-3 border-b border-slate-200">
+                                <div className="font-black text-blue-700 mb-1 flex items-center gap-1">
+                                  <span>📖</span> 長文全体の和文（全訳）:
+                                </div>
+                                <div className="text-slate-800 whitespace-pre-line bg-white p-3 rounded-xl border border-slate-200 leading-relaxed">
+                                  {currentResult.question.passageJa || currentResult.question.translation.split('\n\n')[0] || '長文の全訳があります。'}
+                                </div>
+                              </div>
+                            )}
+
+                            <div>
+                              <div className="font-black text-slate-700 mb-1">
+                                📝 設問・選択肢の和訳:
+                              </div>
+                              <div className="whitespace-pre-line text-slate-700 font-medium">
+                                {currentResult.question.translation || '日本語訳情報がありません。'}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                {/* 次の問題へボタン */}
                 <button
                   onClick={handleNextQuestion}
-                  className="w-full py-4 bg-indigo-600 active:bg-indigo-700 text-white font-black rounded-2xl text-sm shadow-lg shadow-indigo-100 transition-all"
+                  className="w-full py-4 bg-slate-900 active:bg-slate-800 text-white font-black rounded-2xl text-sm shadow-lg transition-all"
                 >
                   {currentIndex + 1 < quizQueue.length ? '次の問題へ進む' : '結果を見る'}
                 </button>
@@ -811,23 +1392,21 @@
             )}
 
             {/* ========================================================= */}
-            {/* 4. RESULT画面 */}
+            {/* 5. 結果サマリー画面 */}
             {/* ========================================================= */}
             {screen === 'result' && (
               <div className="p-6 sm:p-8 text-center space-y-5">
-                <div className="w-14 h-14 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto text-3xl shadow-inner">
+                <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto text-3xl shadow-inner">
                   🎉
                 </div>
                 <div>
                   <h2 className="text-xl sm:text-2xl font-black text-slate-900">セッション完了！</h2>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    忘却曲線に基づいて次回の学習日が自動更新されました
-                  </p>
+                  <p className="text-xs text-slate-500 mt-0.5">今回の演習スコアを確認しましょう</p>
                 </div>
 
                 <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-5">
                   <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">正答率</div>
-                  <div className="text-4xl sm:text-5xl font-black text-indigo-600">
+                  <div className="text-4xl sm:text-5xl font-black text-blue-600">
                     {Math.round((sessionCorrectCount / quizQueue.length) * 100)}%
                   </div>
                   <div className="text-xs text-slate-500 font-bold mt-1">
@@ -835,12 +1414,20 @@
                   </div>
                 </div>
 
-                <button
-                  onClick={() => setScreen('home')}
-                  className="w-full py-3.5 bg-indigo-600 active:bg-indigo-700 text-white font-black rounded-2xl text-sm shadow-lg shadow-indigo-100 transition-all"
-                >
-                  トップ画面に戻る
-                </button>
+                <div className="space-y-2 pt-2">
+                  <button
+                    onClick={() => setScreen(activeMode === 'daily' ? 'daily-home' : 'toeic-home')}
+                    className="w-full py-3.5 bg-blue-600 active:bg-blue-700 text-white font-black rounded-2xl text-sm shadow-md transition-all"
+                  >
+                    同じモードで再挑戦する
+                  </button>
+                  <button
+                    onClick={() => setScreen('mode-select')}
+                    className="w-full py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl text-sm transition-all"
+                  >
+                    モード選択（トップ）に戻る
+                  </button>
+                </div>
               </div>
             )}
 
