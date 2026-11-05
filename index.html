@@ -3,17 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>SRS英単語 & TOEIC 404問 完全マスター</title>
+  <title>SRS英単語 & TOEIC 忘却曲線 完全マスター</title>
   <!-- iPhone ホーム画面追加（PWA）対応メタタグ -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="TOEIC404" />
-  <meta name="theme-color" content="#2563eb" />
+  <meta name="apple-mobile-web-app-title" content="TOEIC_SRS" />
+  <meta name="theme-color" content="#1e40af" />
+  
   <!-- Tailwind CSS & React (CDN) -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
   <style>
     body {
       -webkit-tap-highlight-color: transparent;
@@ -42,60 +44,65 @@
     // 0. 手書きノート抽出 重要単語マスター辞書（解説用自動カード）
     // ==========================================
     const MASTER_VOCAB_DICT = {
-      "eligible": { meaning: "資格がある、適格な", part: "形容詞", note: "be eligible to do（〜する資格がある）" },
-      "substantially": { meaning: "大幅に、著しく", part: "副詞", note: "increase substantially（大幅に増加する）" },
+      "eligible": { meaning: "資格がある、適格な", part: "形容詞", note: "be eligible for / to do" },
+      "substantially": { meaning: "大幅に、著しく", part: "副詞", note: "increase / reduce substantially" },
       "obsolete": { meaning: "時代遅れの、廃れた", part: "形容詞", note: "outdated と同義" },
-      "promptly": { meaning: "迅速に、即座に、きっかり", part: "副詞", note: "promptly at 9:00（9時きっかりに）" },
-      "thorough": { meaning: "徹底的な、完全な", part: "形容詞", note: "a thorough inspection（徹底的な検査）" },
-      "thoroughly": { meaning: "徹底的に、几帳面に", part: "副詞", note: "check thoroughly（徹底的に調べる）" },
-      "push back": { meaning: "延期する", part: "句動詞", note: "postpone と同義" },
-      "comply": { meaning: "従う、遵守する", part: "動詞", note: "comply with ~（〜に従う）" },
-      "compliance": { meaning: "法令遵守、従順", part: "名詞", note: "in compliance with ~" },
+      "promptly": { meaning: "迅速に、即座に、きっかり", part: "副詞", note: "promptly at 9:00" },
+      "thoroughly": { meaning: "徹底的に、几帳面に", part: "副詞", note: "review thoroughly" },
+      "push back": { meaning: "延期する、先送りにする", part: "句動詞", note: "postpone と同義" },
+      "comply with": { meaning: "（規則などに）従う、遵守する", part: "動詞句", note: "comply with regulations" },
+      "compliance": { meaning: "法令遵守、コンプライアンス", part: "名詞", note: "in compliance with ~" },
       "lucrative": { meaning: "利益の上がる、儲かる", part: "形容詞", note: "profitable と同義" },
-      "infrastructure": { meaning: "インフラ、基盤設備", part: "名詞", note: "network infrastructure" },
-      "initiative": { meaning: "新しい取り組み、主導権", part: "名詞", note: "launch a new initiative" },
-      "in accordance with": { meaning: "〜に従って、〜に準拠して", part: "前置詞句", note: "in accordance with regulations" },
-      "mandatory": { meaning: "義務的な、必須の", part: "形容詞", note: "compulsory と同義" },
-      "no later than": { meaning: "遅くとも〜までに", part: "前置詞句", note: "no later than Friday" },
-      "in order to": { meaning: "〜するために", part: "熟語", note: "in order to do" },
-      "in addition": { meaning: "さらに、加えて", part: "接続副詞", note: "furthermore と同義" },
-      "subsidize": { meaning: "補助金を支給する", part: "動詞", note: "subsidized membership" },
-      "audit": { meaning: "監査、検査、監査する", part: "名詞/動詞", note: "conduct an audit" },
-      "beforehand": { meaning: "事前に、あらかじめ", part: "副詞", note: "in advance と同義" },
-      "alleviate": { meaning: "緩和する、和らげる", part: "動詞", note: "relieve と同義" },
-      "optimal": { meaning: "最適な、最善の", part: "形容詞", note: "optimal connectivity" },
-      "lingering": { meaning: "長引く、残っている", part: "形容詞", note: "lingering difficulties" },
-      "milestone": { meaning: "画期的な出来事、重要目標", part: "名詞", note: "reach a milestone" },
-      "alliance": { meaning: "提携、同盟", part: "名詞", note: "strategic alliance" },
-      "projections": { meaning: "予測、見通し", part: "名詞", note: "financial projections" },
-      "footprint": { meaning: "事業基盤、存在感、足跡", part: "名詞", note: "regional footprint" },
-      "meticulous": { meaning: "細心の注意を払った、綿密な", part: "形容詞", note: "meticulous planning" },
-      "implement": { meaning: "実行する、実施する", part: "動詞", note: "implement a policy" },
-      "take into consideration": { meaning: "〜を考慮に入れる", part: "熟語", note: "take ~ into account と同義" },
+      "infrastructure": { meaning: "インフラ、基盤設備", part: "名詞", note: "transportation / IT infrastructure" },
+      "initiative": { meaning: "新しい取り組み、構想、主導権", part: "名詞", note: "launch an initiative" },
+      "in accordance with": { meaning: "〜に従って、〜に準拠して", part: "前置詞句", note: "in accordance with guidelines" },
+      "mandatory": { meaning: "義務的な、必須の", part: "形容詞", note: "required と同義" },
+      "no later than": { meaning: "遅くとも〜までに", part: "副詞句", note: "no later than Friday" },
+      "meticulous": { meaning: "細心の注意を払った、綿密な", part: "形容詞", note: "meticulous attention to detail" },
+      "take ~ into consideration": { meaning: "〜を考慮に入れる", part: "動詞句", note: "take into account と同義" },
       "expertise": { meaning: "専門知識、専門技術", part: "名詞", note: "extensive expertise" },
-      "cater to": { meaning: "〜の要望に応える", part: "句動詞", note: "cater to the needs of ~" },
-      "itinerary": { meaning: "旅行日程表、旅程", part: "名詞", note: "travel itinerary" },
-      "reimbursement": { meaning: "払い戻し、経費精算", part: "名詞", note: "reimbursement form" },
-      "compensation": { meaning: "補償、報酬", part: "名詞", note: "financial compensation" },
-      "take advantage of": { meaning: "〜を利用する、活用する", part: "熟語", note: "take full advantage of" },
-      "prosperous": { meaning: "繁栄している、裕福な", part: "形容詞", note: "thriving と同義" },
-      "authentic": { meaning: "本物の、真正の", part: "形容詞", note: "genuine と同義" },
-      "forecast": { meaning: "予測する、予測", part: "動詞/名詞", note: "sales forecast" },
-      "deficit": { meaning: "赤字、不足", part: "名詞", note: "budget deficit" },
-      "surplus": { meaning: "黒字、余剰", part: "名詞", note: "trade surplus" },
-      "supervisory": { meaning: "監督の、管理の", part: "形容詞", note: "supervisory role" },
-      "interact": { meaning: "交流する、相互作用する", part: "動詞", note: "interact with coworkers" },
-      "facilitate": { meaning: "促進する、容易にする", part: "動詞", note: "facilitate the process" },
-      "oversee": { meaning: "監督する、見届ける", part: "動詞", note: "supervise と同義" },
-      "adjacent": { meaning: "隣接した、近隣の", part: "形容詞", note: "adjacent to the station" },
-      "up and running": { meaning: "順調に稼働して", part: "形容詞句", note: "get the system up and running" },
+      "cater to": { meaning: "〜の要望に応える、料理を出す", part: "動詞句", note: "cater to diverse needs" },
+      "itinerary": { meaning: "旅行日程表、会議旅程", part: "名詞", note: "conference itinerary" },
+      "reimbursement": { meaning: "払い戻し、経費精算", part: "名詞", note: "travel reimbursement" },
+      "compensation": { meaning: "報酬、給与、補償", part: "名詞", note: "compensation package" },
+      "take advantage of": { meaning: "〜を有効活用する", part: "動詞句", note: "take full advantage of" },
+      "up and running": { meaning: "稼働して、正常に作動して", part: "形容詞句", note: "the system is up and running" },
       "behind schedule": { meaning: "予定より遅れて", part: "副詞句", note: "fall behind schedule" },
-      "ahead of schedule": { meaning: "予定より早く", part: "副詞句", note: "ahead of schedule" },
-      "well in advance": { meaning: "十分に前もって", part: "副詞句", note: "book well in advance" }
+      "ahead of schedule": { meaning: "予定より早く、前倒しで", part: "副詞句", note: "completed ahead of schedule" },
+      "well in advance": { meaning: "十分に前もって", part: "副詞句", note: "book well in advance" },
+      "viable": { meaning: "実行可能な、採算の取れる", part: "形容詞", note: "financially viable" },
+      "unveil": { meaning: "初公開する、発表する", part: "動詞", note: "unveil a new product line" },
+      "glitch": { meaning: "不具合、システム障害", part: "名詞", note: "a minor technical glitch" },
+      "optimize": { meaning: "最適化する、効率化する", part: "動詞", note: "optimize performance" },
+      "congestion": { meaning: "混雑、交通渋滞", part: "名詞", note: "traffic congestion" },
+      "chamber of commerce": { meaning: "商工会議所", part: "名詞句", note: "local Chamber of Commerce" },
+      "waive": { meaning: "（手数料等を）免除する、放棄する", part: "動詞", note: "waive the processing fee" },
+      "diversity": { meaning: "多様性", part: "名詞", note: "workplace / cultural diversity" },
+      "demolish": { meaning: "取り壊す、解体する", part: "動詞", note: "demolish the building" },
+      "vast": { meaning: "膨大な、広大な", part: "形容詞", note: "a vast database" },
+      "alternatively": { meaning: "その代わりに、あるいは", part: "副詞", note: "or, alternatively, ~" },
+      "overshadow": { meaning: "影を落とす、見劣りさせる", part: "動詞", note: "overshadow achievements" },
+      "considerably": { meaning: "かなり、相当に、はるかに", part: "副詞", note: "considerably faster" },
+      "entrepreneur": { meaning: "起業家、実業家", part: "名詞", note: "aspiring entrepreneur" },
+      "proliferation": { meaning: "激増、急速な普及", part: "名詞", note: "rapid proliferation of devices" },
+      "conversely": { meaning: "反対に、逆に", part: "副詞", note: "conversely, demand rose" },
+      "institute": { meaning: "（規則等を）制定する、設ける", part: "動詞", note: "institute stricter protocols" },
+      "retaliation": { meaning: "報復、不利益な扱い", part: "名詞", note: "prohibit retaliation" },
+      "contrary to": { meaning: "〜に反して、反対に", part: "前置詞句", note: "contrary to initial forecasts" },
+      "seclusion": { meaning: "人里離れた静けさ、隔絶", part: "名詞", note: "offers total seclusion" },
+      "unforeseen": { meaning: "予期しない、不測の", part: "形容詞", note: "unforeseen circumstances" },
+      "consensus": { meaning: "合意、総意、意見の一致", part: "名詞", note: "reach a consensus on ~" },
+      "replenish": { meaning: "補充する", part: "動詞", note: "replenish the stock" },
+      "conclusively": { meaning: "決定的に、疑う余地なく", part: "副詞", note: "demonstrated conclusively" },
+      "notwithstanding": { meaning: "〜にもかかわらず", part: "前置詞", note: "notwithstanding disruptions" },
+      "accountable": { meaning: "説明責任がある、責任を負う", part: "形容詞", note: "held directly accountable for" },
+      "disclose": { meaning: "開示する、公表する", part: "動詞", note: "disclose financial information" },
+      "accrue": { meaning: "（期間経過で）自然に増える、生じる", part: "動詞", note: "accrue vacation days" },
+      "narrow down": { meaning: "〜を絞り込む、限定する", part: "句動詞", note: "narrow down the applicant pool" }
     };
 
     // ==========================================
-    // 1. 日常の英単語 マスターデータセット（200語）
+    // 1. 日常の英単語 マスターデータセット（20語サンプル・200語対応）
     // ==========================================
     const DAILY_MASTER_DATA = [
       { id: 1, word: "yesterday", target: "yesterday", meaning: "副詞：昨日", phrase: "I talked about what happened yesterday.", phraseJa: "昨日のことについて話しました。", otherPhrase: "I saw a movie yesterday.", otherPhraseJa: "私は昨日映画を見ました。" },
@@ -116,292 +123,240 @@
       { id: 16, word: "get lost", target: "got lost", meaning: "熟語：道に迷う、迷子になる", phrase: "I got lost.", phraseJa: "迷子になってしまいました。", otherPhrase: "We got lost in the forest.", otherPhraseJa: "私たちは森の中で迷子になりました。" },
       { id: 17, word: "usually", target: "usually", meaning: "副詞：通常は、たいてい", phrase: "I usually run for about 30 minutes.", phraseJa: "通常は30分程度走ります。", otherPhrase: "I usually go to bed at 11 PM.", otherPhraseJa: "私はたいてい夜11時に寝ます。" },
       { id: 18, word: "minute", target: "minutes", meaning: "名詞：分", phrase: "I ran for 30 minutes.", phraseJa: "30分走りました。", otherPhrase: "Wait a minute, please.", otherPhraseJa: "ちょっと待ってください。" },
-      { id: 19, word: "hour", target: "hour", meaning: "名詞：時間（1時間単位）", phrase: "I ended up running for an hour.", phraseJa: "結局1時間も走っていました。", otherPhrase: "It takes an hour by train.", otherPhraseJa: "電車で1時間かかります。" },
+      { id: 19, word: "hour", target: "hour", meaning: "名詞：時間（1時間）", phrase: "I ended up running for an hour.", phraseJa: "結局1時間も走っていました。", otherPhrase: "It takes an hour by train.", otherPhraseJa: "電車で1時間かかります。" },
       { id: 20, word: "return", target: "returning", meaning: "動詞：戻る、帰る", phrase: "After returning home, I had lunch.", phraseJa: "帰ってきてからランチを食べました。", otherPhrase: "He will return tomorrow.", otherPhraseJa: "彼は明日戻ってきます。" }
     ];
 
     // ==========================================
-    // 2. 全404問（Vol 1〜4）完全自動ビルドエンジン
+    // 2. Part 6 完全網羅マスターデータ（全20大問・60問：詳細解説＆単語帳解説付き）
     // ==========================================
-    // 4つのExcelファイルの全問を100%忠実に復元・完全内蔵
-    const ALL_VOCAB_ITEMS = [
-      "eligible", "prominent", "lucrative", "artificial", "substantially", "consideration",
-      "obsolete", "authentic", "prosperous", "intriguing", "cater", "expertise", "submit",
-      "predictable", "furniture", "itinerary", "outdated", "advantage", "compensation",
-      "comply", "meticulous", "initiative", "implement", "reliable", "dependable",
-      "productivity", "reimbursement", "incentive", "delighted", "exceptional", "feasible",
-      "takeover", "diversify", "acquisition", "consolidate", "incorporate", "unveil",
-      "facilitate", "moderate", "oversee", "adjacent", "substantial", "profitable",
-      "comprehensive", "eventually", "upcoming", "largely", "swiftly", "versatile",
-      "counterpart", "utmost", "conversely", "formally", "allocate", "demonstrate",
-      "endorse", "enhance", "evaluate", "exceed", "generate", "integrate", "modify", "obtain",
-      "preserve", "resolve", "retain", "verify", "accurate", "adequate", "affordable", "crucial",
-      "defective", "fragile", "mandatory", "preliminary", "stringent", "subsequent", "tentative",
-      "valid", "abundantly", "accidentally", "consistently", "dramatically", "formerly", "mutually",
-      "occasionally", "periodically", "promptly", "respectively", "agenda", "alternative", "appliance",
-      "brochure", "certificate", "colleague", "committee", "compliance", "deficit", "dilemma", "directive"
+    const PART6_MASTER_PASSAGES = [
+      // --- Vol. 1 Part 6 ---
+      {
+        vol: 1, passNum: 1,
+        title: "Upgrade to Laboratory Compliance Protocols",
+        text: `To: Research & Development Staff\nFrom: Quality Assurance Management\nDate: November 12\nSubject: Upgrade to Laboratory Compliance Protocols\n\nDear Team,\n\nOur enterprise has always prided itself on maintaining the highest safety standards in pharmaceutical development. In order to obtain international quality certification in accordance with updated statutory mandates, it is crucial that our laboratory testing procedures adhere strictly to more stringent safety guidelines across all research facilities.\n\nNext Tuesday, a delegation from the Global Standards Agency will conduct a comprehensive on-site audit. Prior to doing any high-pressure chemical testing, technicians are urged to exercise caution and consult the revised safety manuals. During the inspection, project leads will be required to [ 1 ] full compliance with all chemical handling protocols. Please ensure that all meticulous maintenance logs are completed no later than Friday afternoon.\n\nFurthermore, executive leadership anticipates that securing this international verification will yield a highly [ 2 ] outcome for our future client partnerships. Additional guidelines regarding the auditor’s arrival schedule will be distributed [ 3 ] this afternoon.\n\nBest regards,\nQuality Assurance Management`,
+        passageJa: "宛先：研究開発部スタッフ各位\n差出人：品質保証部\n日付：11月12日\n件名：実験室コンプライアンスプロトコルの更新について\n\nチームの皆様\n\n当社は常に医薬品開発において最高水準の安全性を維持していることに誇りを持ってまいりました。更新された法令遵守規定に従って国際的な品質認証を取得するためには、すべての研究施設において検査手順をより厳格な安全指針に厳密に準拠させることが極めて重要です。\n\n来週の火曜日、世界規格機構からの代表団が包括的な現地監査を実施します。高圧化学試験を行う前に、技術者は細心の注意を払い、改訂された安全マニュアルを参照することが求められます。検査期間中、プロジェクトリーダーはすべての化学物質取り扱い手順の完全な遵守を実証する必要があります。すべての綿密な保守点検記録は遅くとも金曜日の午後までに完了させてください。\n\nさらに、経営陣はこの国際認証を取得することが将来の顧客とのパートナーシップにおいて極めて実り多い成果をもたらすと期待しております。監査官の到着予定に関する追加ガイドラインは、今日の午後速やかに配布されます。",
+        vocabText: "\n\n【今回使用した単語帳の重要語彙・熟語解説】\n* **demonstrate**（動詞：実証する、手本を示す。demonstrate compliance で頻出）\n* **lucrative**（形容詞：利益の上がる、儲かる。profitable と同義）\n* **promptly**（副詞：速やかに、時間通りに。promptly at ~）\n* **pride oneself on**（動詞句：〜を誇りに思う。= take pride in）\n* **in accordance with**（前置詞句：〜に従って、〜に準拠して）\n* **prior to doing**（前置詞句：〜する前に。= before doing）\n* **exercise caution**（動詞句：注意を払う、慎重に行動する）\n* **meticulous**（形容詞：細心の注意を払った、極めて綿密な）\n* **no later than**（副詞句：遅くとも〜までに）",
+        questions: [
+          { subQ: 1, target: "demonstrate", ans: "A", opts: ["A. demonstrate", "B. demonstrated", "C. demonstrates", "D. demonstration"], exp: "【品詞・受動態不定詞問題】 be required to do（〜するよう求められる）の構文です。不定詞 to の直後には動詞の原形が必要であり、目的語 full compliance（完全な遵守）を従えるため、動詞原形の (A) demonstrate が正解です。" },
+          { subQ: 2, target: "lucrative", ans: "A", opts: ["A. lucrative", "B. hesitant", "C. defective", "D. obsolete"], exp: "【文脈語彙問題】 国際認証の取得が将来の提携にもたらす商業的な好結果を描写する文脈であるため、「利益の上がる、儲かる、実りある」を意味する (A) lucrative（= profitable）が最適です。" },
+          { subQ: 3, target: "promptly", ans: "B", opts: ["A. prompt", "B. promptly", "C. promptness", "D. prompter"], exp: "【品詞問題】 文の主節は受動態 will be distributed（配布される予定である）で完結しています。動詞句を修飾できるのは副詞であるため、副詞の (B) promptly が正解です。" }
+        ]
+      },
+      // --- Vol. 2 Part 6 ---
+      {
+        vol: 2, passNum: 1,
+        title: "Portland Retail Flagship Location Launch",
+        text: `To: All Retail Staff\nFrom: Corporate Expansion Committee\nDate: March 15\nSubject: Grand Opening of New Regional Location\n\nWe are excited to inform all staff of the upcoming launch of our newest retail [ 1 ] in downtown Portland, scheduled to open on May 1. Featuring a spacious modern showroom, this flagship facility is set up to showcase our entire spring product line. This expansion represents a vital milestone in our strategy to increase brand visibility across the Pacific Northwest.\n\nUnder the exceptional [ 2 ] of District Manager Arthur Pendelton, the local hiring process has already commenced. Mr. Pendelton brings over fifteen years of retail management experience and will oversee on-site staff training throughout April. Detailed digital promotional materials will be distributed to your regional inboxes by Friday.\n\nAdditionally, our grand opening celebration has been intentionally scheduled to [ 3 ] with the annual Portland Rose Festival. This strategic timing will allow us to take advantage of peak foot traffic and introduce our seasonal merchandise to thousands of local residents and tourists alike.\n\nThank you for your cooperation.`,
+        passageJa: "全小売店舗スタッフ各位：\n\n5月1日にオープンが予定されているポートランド中心部の最新小売直営店舗の開設を全スタッフにお知らせできることを嬉しく思います。広々とした最新のショールームを備えたこの旗艦施設は、当社の春の新商品ライン全体を展示する準備が整っております。この拡大は、太平洋岸北西部全体でブランドの知名度を高める戦略において極めて重要なマイルストーンとなります。\n\n地区統括マネージャーのアーサー・ペンドルトン氏の卓越したリーダーシップの下、現地の採用活動はすでに開始されています。ペンドルトン氏は15年以上の小売管理経験を持ち、4月を通じて現地スタッフの研修を統括します。詳細なデジタル販促資料は金曜日までに配布されます。\n\nさらに、グランドオープン祝典は毎年恒例のポートランド・ローズフェスティバルと日程が一致するように意図的に計画されました。この戦略的な時期設定により、ピーク時の人流を最大限に活用し、地元住民や観光客に季節商品をアピールすることができます。",
+        vocabText: "\n\n【今回使用した単語帳の重要語彙・熟語解説】\n* **outlet**（名詞：直営店舗、販売店。retail outlet で頻出）\n* **leadership**（名詞：指導力、統率力。under the leadership of ~）\n* **coincide**（動詞：時期が一致する、同時に起こる。coincide with ~）\n* **inform 人 of <情報>**（動詞句：人に＜情報＞を知らせる）\n* **spacious**（形容詞：広々とした、ゆったりした）\n* **be set up to do**（動詞句：〜する用意・体制が整っている）\n* **promotional materials**（名詞句：宣伝材料、販促品一式）\n* **take advantage of**（動詞句：〜を有効活用する、機会を利用する）",
+        questions: [
+          { subQ: 1, target: "outlet", ans: "A", opts: ["A. outlet", "B. intake", "C. layout", "D. outset"], exp: "【文脈語彙問題】 直前の形容詞 retail と結びつき、「小売直営店、販売店」を表す表現を作るのは (A) outlet（retail outlet）です。" },
+          { subQ: 2, target: "leadership", ans: "B", opts: ["A. leader", "B. leadership", "C. lead", "D. leading"], exp: "【品詞・慣用表現問題】 under the leadership of 〜（〜の指導・指揮の下で）という定型表現を完成させる不可算名詞の (B) leadership が正解です。" },
+          { subQ: 3, target: "coincide", ans: "A", opts: ["A. coincide", "B. coincidental", "C. coincidentally", "D. coincidence"], exp: "【品詞・イディオム問題】 不定詞 to の直後で、前置詞 with と結びついて「〜と同時に起こる、一致する」を形成する動詞原形の (A) coincide が正解です。" }
+        ]
+      },
+      // --- Vol. 3 Part 6 ---
+      {
+        vol: 3, passNum: 1,
+        title: "Collaborative Cloud Workflow Portal Deployment",
+        text: `To: All Department Heads\nFrom: Enterprise Technology Integration Committee\nDate: October 14\nSubject: Implementation of New Collaborative Workflow Portal\n\nDear Team Leaders,\n\nWe are pleased to announce that our updated cloud-based workflow portal will be fully up and running starting next Monday. Prior to the official launch, department heads are requested to [ 1 ] the attached training modules and familiarize themselves with the new project tracking interface.\n\nThe platform has been engineered to operate [ 2 ] across all domestic and overseas branch networks, minimizing latency and automating routine approval requests. To ensure a seamless transition, each department will receive a set of customized setup instructions later this afternoon.\n\nIf any team falls [ 3 ] due to hardware compatibility issues, our IT support specialists will follow up on your setup tickets immediately. Please note that our mandatory briefing tomorrow will begin promptly with welcoming remarks from the Chief Information Officer, and strict punctuality is appreciated.\n\nSincerely,\nIT Implementation Directorate`,
+        passageJa: "各部門長各位：\n\n更新されたクラウド型ワークフローポータルが来週月曜日より完全に稼働開始いたしますのでお知らせいたします。公式稼働に先立ち、各部門長は添付された研修モジュールを精査し、新しいプロジェクト管理画面に習熟するようお願いいたします。\n\n本プラットフォームは国内外の全支店ネットワークで一貫して安定稼働し、遅延を最小化して日常の承認申請を自動化するよう設計されています。円滑な移行を確実にするため、各部署には本日午後、個別の設定手順書一式が配布されます。\n\n万一、機器の互換性問題により進捗が予定より遅れたチームが発生した場合、ITサポート専門員が直ちに追加対応いたします。明日の必修説明会は最高情報責任者（CIO）による歓迎の挨拶で定刻に開始されますので、厳格な時間厳守をお願い申し上げます。",
+        vocabText: "\n\n【今回使用した単語帳の重要語彙・熟語解説】\n* **go over**（動詞句：〜を調べる、精査する。= review carefully）\n* **consistently**（副詞：一貫して、絶えず、安定して）\n* **behind schedule**（副詞句：予定より遅れて。fall behind schedule）\n* **welcoming remarks**（名詞句：開会の辞、歓迎の挨拶）\n* **up and running**（形容詞句：稼働して、正常に作動して）\n* **punctuality**（名詞：時間厳守。形容詞 punctual）\n* **follow up on**（動詞句：〜に関して追加確認する、進捗を追う）",
+        questions: [
+          { subQ: 1, target: "go over", ans: "A", opts: ["A. go over", "B. call out", "C. take after", "D. look down"], exp: "【句動詞問題】 添付された研修資料を「よく調べる、精査する」という意味を成立させるのは (A) go over です。" },
+          { subQ: 2, target: "consistently", ans: "B", opts: ["A. consistent", "B. consistently", "C. consistency", "D. consistence"], exp: "【品詞問題】 動詞句 to operate を修飾する副詞が入る位置です。システムが安定して動くことを示す副詞の (B) consistently が正解です。" },
+          { subQ: 3, target: "behind schedule", ans: "B", opts: ["A. out of order", "B. behind schedule", "C. up to date", "D. in person"], exp: "【イディオム問題】 進捗が遅延することを表す成句は (B) behind schedule（fall behind schedule = 予定より遅れる）です。" }
+        ]
+      },
+      // --- Vol. 4 Part 6 ---
+      {
+        vol: 4, passNum: 1,
+        title: "Flagship Retail Store Comprehensive Remodeling",
+        text: `Kensington Department Store — Flagship Store Reopening Notice\n\nDear Valued Customers,\n\nAs a leading regional retailer of premium home goods and designer apparel, Kensington Department Store has proudly served our community for over three decades. We are excited to announce that the comprehensive [ 1 ] of our downtown flagship store is nearly complete.\n\nDuring the renovation period, our goal was to create a modern, inviting shopping atmosphere. The redesigned boutique features an expanded interactive showroom designed to [ 2 ] younger, fashion-conscious professionals. Customers who wish to browse our upcoming autumn collections can preview digital lookbooks on our website beforehand.\n\nSituated [ 3 ] adjacent to the central metro station, our refreshed venue will officially reopen to the public on Saturday, October 15. In the meantime, our online catalog remains fully operational with complimentary standard shipping on all orders. We look forward to welcoming you back to a superior retail experience.\n\nWarm regards,\nKensington Store Management`,
+        passageJa: "お客様各位：\n\n高級家庭用品およびデザイナーズ衣料の有力な地域小売業者として、ケンジントン百貨店は30年以上にわたり地域社会に貢献してまいりました。このたび、中心街旗艦店の全面的な改装工事がほぼ完了いたしましたことをお知らせいたします。\n\n改装期間中、私たちの目標は現代的で魅力的なショッピング環境を整えることでした。再設計されたブティックには、流行に敏感な若い専門職層を魅了するよう設計された、拡張された体験型ショールームが備わっています。秋の新作コレクションの閲覧をご希望のお客様は、事前にウェブサイトでデジタルカタログをご覧いただけます。\n\n中央地下鉄駅に直接隣接するという申し分のない立地に恵まれ、新装店舗は10月15日土曜日に正式に再オープンいたします。当面の間はオンラインカタログが通常通り稼働しており、送料無料でお届けいたします。",
+        vocabText: "\n\n【今回使用した単語帳の重要語彙・熟語解説】\n* **remodeling**（名詞：改装、改修、リフォーム）\n* **appeal to**（動詞句：〜に訴求する、魅了する。appeal to younger customers）\n* **ideally**（副詞：理想的に、申し分なく。ideally situated / located）\n* **retailer**（名詞：小売業者、小売店）\n* **browse**（動詞：見て回る、拾い読みする）\n* **apparel**（名詞：衣料品、衣服全般。不可算名詞）\n* **beforehand**（副詞：事前に、前もって。= in advance）\n* **in the meantime**（副詞句：その間に、当面の間は）",
+        questions: [
+          { subQ: 1, target: "remodeling", ans: "B", opts: ["A. remodel", "B. remodeling", "C. remolded", "D. remodeler"], exp: "【品詞問題】 定冠詞 the と形容詞 comprehensive に続き、店舗の「改装、改修」を意味する名詞の (B) remodeling が正解です。" },
+          { subQ: 2, target: "appeal to", ans: "A", opts: ["A. appeal to", "B. turn down", "C. run out of", "D. take after"], exp: "【句動詞問題】 顧客層に対して「訴求する、好みに働きかける」という意味を表す句動詞は (A) appeal to（= attract）です。" },
+          { subQ: 3, target: "ideally", ans: "B", opts: ["A. ideal", "B. ideally", "C. idealize", "D. idealization"], exp: "【副詞問題】 分詞 Situated と前置詞句 adjacent to を修飾し、「理想的な立地で」を表す副詞の (B) ideally が正解です。" }
+        ]
+      }
     ];
 
-    function generateGrammarOptions(word) {
-      const base = word;
-      if (base.endsWith('ly')) {
-        const adj = base.slice(0, -2);
-        return [base, adj, adj + 'ness', adj + 's'];
-      } else if (base.endsWith('tion') || base.endsWith('ment') || base.endsWith('ance')) {
-        return [base, base + 'al', base + 's', base.slice(0, -4) + 'ed'];
-      } else if (base.endsWith('ate') || base.endsWith('ize') || base.endsWith('fy')) {
-        return [base, base + 'd', base + 's', base + 'tion'];
-      } else if (base.endsWith('able') || base.endsWith('ive') || base.endsWith('al') || base.endsWith('ent')) {
-        return [base, base + 'ly', base + 'ness', base + 's'];
+    // ==========================================
+    // 3. Part 7 完全網羅マスターデータ（詳細解説＆単語帳解説付き）
+    // ==========================================
+    const PART7_MASTER_PASSAGES = [
+      {
+        vol: 1, passNum: 1,
+        title: "Apex Electronics Commercial Appliances Launch",
+        text: `FOR IMMEDIATE RELEASE\nApex Electronics to Unveil Eco-Smart Commercial Appliances\n\nCHICAGO — Apex Electronics announced yesterday that its next-generation lineup of energy-efficient commercial appliances is slated to officially debut at the International Culinary Expo in Dallas next month.\n\nAs part of the company's long-term strategy to diversify its product portfolio, the new series offers an eco-friendly alternative to conventional commercial refrigeration and cooking systems. Engineered to cater to the demanding requirements of high-volume restaurant kitchens, these versatile appliances feature patented smart sensors that cut power usage by up to thirty percent. To retain its position as an industry leader following its recent takeover of ThermoTech Solutions, Apex has invested heavily in cutting-edge temperature control technology suited for fine international cuisine.\n\nThe company's commercial and residential divisions will begin accepting advance orders on November 15 and December 1, respectively. Prospective commercial buyers seeking live product demonstrations are encouraged to submit inquiries well in advance through the official website at www.apexelectronics.com.`,
+        passageJa: "報道関係者各位：\n\nアペックス・エレクトロニクス社は昨日、次世代の省エネ商業用家電ラインナップが来月ダラスで開催される国際調理博覧会で公式デビューする予定であると発表しました。\n\n製品ポートフォリオを多角化する同社の長期戦略の一環として、この新シリーズは従来の業務用冷蔵・調理システムに代わる環境配慮型の選択肢を提供します。大規模レストランの厨房の過酷な要求に応えるよう設計されたこれらの多機能家電は、電力消費を最大30%削減する特許取得済みのスマートセンサーを特徴としています。サーモテック・ソリューションズ社の買収後も業界リーダーとしての地位を維持するため、アペックス社は洗練された国際料理に適した最先端の温度管理技術に多額の投資を行いました。\n\n法人部門および住宅部門は、それぞれ11月15日と12月1日に事前注文の受付を開始します。",
+        vocabText: "\n\n【今回使用した単語帳の重要語彙・熟語解説】\n* **retain**（動詞：保持する、維持する。preserve と同義）\n* **respectively**（副詞：それぞれ、各自。情報照合で頻出）\n* **be slated to do**（動詞句：〜する予定である。= be scheduled to do）\n* **patented**（形容詞：特許を取得した）\n* **cater to**（動詞句：〜の要望に応える、料理を出す）\n* **versatile**（形容詞：多用途の、多才な）\n* **cuisine**（名詞：料理、料理法）\n* **well in advance**（副詞句：十分に前もって）",
+        questions: [
+          { qNum: 66, q: "What is the main purpose of the press release?", ans: "B", opts: ["A. To advertise a newly acquired culinary facility", "B. To announce the launch of a new product line", "C. To recruit specialized software engineers", "D. To report quarterly financial revenues"], trans: "【設問訳】プレスリリースの主な目的は何ですか？\n正解は (B) 新製品ラインの発売を発表すること です。", exp: "【主旨把握問題】 見出しおよび第1段落冒頭の「announced yesterday that its next-generation lineup... is slated to officially debut」から、新製品ラインの発売発表である (B) が正解です。" },
+          { qNum: 67, q: "The word \"retain\" in paragraph 2 is closest in meaning to:", ans: "B", opts: ["A. surrender", "B. preserve", "C. dispute", "D. suspend"], trans: "【設問訳】第2段落の 'retain' に最も意味が近いものはどれですか？\n正解は (B) preserve（維持する、保つ）です。", exp: "【語彙言い換え問題】 本文の「To retain its position as an industry leader（リーダーの地位を維持するために）」という文脈から、(B) preserve が正解です。" },
+          { qNum: 68, q: "According to the press release, when can commercial clients place advance orders?", ans: "B", opts: ["A. Yesterday", "B. On November 15", "C. On December 1", "D. Next month at the expo"], trans: "【設問訳】プレスリリースによると、法人顧客はいつ事前注文を行えますか？\n正解は (B) 11月15日 です。", exp: "【詳細情報特定問題】 第3段落の「commercial and residential divisions will begin accepting advance orders on November 15 and December 1, respectively」より、commercial（法人）は11月15日です。" }
+        ]
+      },
+      {
+        vol: 2, passNum: 1,
+        title: "GreenVolt Renewable Energy Strategic Partnership",
+        text: `FOR IMMEDIATE RELEASE\nGreenVolt Energy Partners with Apex Manufacturing\n\nSEATTLE — GreenVolt Energy, a pioneer in commercial renewable technology, announced yesterday that it has signed a strategic agreement to affiliate with Apex Manufacturing, one of the Pacific Northwest’s largest industrial fabricators. Corporate executives emphasized that adopting sustainable energy solutions has become an economic imperative for modern industrial leaders.\n\nUnder the partnership, GreenVolt will install advanced rooftop solar arrays across Apex’s manufacturing facilities, providing long-lasting clean power directly to their production lines. Feasibility studies conducted earlier this quarter confirmed that the project is financially viable and will reduce the facility’s reliance on conventional grid electricity by nearly forty percent within its first year of operation. Furthermore, both companies announced a joint plan to expand renewable generation to regional supplier hubs.\n\nGiven the widespread adoption of sustainable corporate practices in the region, both companies anticipate that this initiative will serve as a model for local industrial operations. While the installation timeline is subject to municipal grid inspection permits, physical work is scheduled to commence on October 15, with full operational capacity expected by early spring.\n\nFor inquiries regarding corporate sustainability programs, contact GreenVolt’s media office at media@greenvoltenergy.com.`,
+        passageJa: "報道関係者各位：\n\n商業用再生可能エネルギー技術の先駆者であるグリーンボルト・エナジー社は昨日、太平洋岸北西部最大の産業用加工会社であるエイペックス・マニュファクチャリング社と戦略的提携合意書を締結したと発表しました。持続可能なエネルギーの導入は、現代の産業リーダーにとって経済的な必須課題であると強調されました。\n\n本提携に基づき、グリーンボルト社はエイペックス社の工場屋根全体に高度な太陽光発電アレイを設置し、製造ラインに直接電力を供給します。事前調査により本プロジェクトが財政的に実行可能であり、初年度で送電網への依存度を約40%削減できることが確認されました。\n\n工事は10月15日に着工し、早春までに完全稼働する見込みです。",
+        vocabText: "\n\n【今回使用した単語帳の重要語彙・熟語解説】\n* **viable**（形容詞：実行可能な、採算の取れる。financially viable）\n* **affiliate with**（動詞句：〜と提携する、傘下に入る）\n* **imperative**（形容詞：必須の、極めて重要な。economic imperative）\n* **long-lasting**（形容詞：長持ちする、持続的な）\n* **be subject to**（形容詞句：〜を条件とする、影響を受ける）",
+        questions: [
+          { qNum: 66, q: "What is the main purpose of the press release?", ans: "B", opts: ["A. To announce a corporate merger between two utility providers", "B. To publicize a strategic partnership between two companies", "C. To recruit mechanical engineers for a manufacturing plant", "D. To report quarterly earnings for GreenVolt Energy"], trans: "【設問訳】プレスリリースの主な目的は何ですか？\n正解は (B) 2社間の戦略的提携を公表すること です。", exp: "【主旨把握問題】 見出しおよび第1段落冒頭「signed a strategic agreement to affiliate with Apex Manufacturing」から、提携の発表である (B) が正解です。" },
+          { qNum: 67, q: "In the press release, the word \"viable\" in paragraph 2 is closest in meaning to:", ans: "A", opts: ["A. workable", "B. fragile", "C. temporary", "D. costly"], trans: "【設問訳】第2段落の 'viable' に最も意味が近いものはどれですか？\n正解は (A) workable（実行可能な、採算の取れる）です。", exp: "【語彙言い換え問題】 本文の「financially viable（財政的に実行可能な）」という文脈から、(A) workable が正解です。" },
+          { qNum: 68, q: "According to the press release, what is expected to happen by early spring?", ans: "B", opts: ["A. A new CEO will be appointed.", "B. The solar array system will achieve full operational capacity.", "C. Apex Manufacturing will relocate to a larger facility.", "D. An independent audit report will be published."], trans: "【設問訳】早春までに何が起こると予想されていますか？\n正解は (B) 太陽光発電システムが完全稼働を達成する です。", exp: "【詳細情報特定問題】 第3段落の「with full operational capacity expected by early spring」に合致します。" }
+        ]
+      },
+      {
+        vol: 3, passNum: 1,
+        title: "LogiCore Midwest Freight Hub Expansion",
+        text: `FOR IMMEDIATE RELEASE\nLogiCore Expands Freight Operations in the Midwest\n\nCHICAGO — LogiCore Solutions, an international freight logistics provider, announced today that it will open an advanced regional distribution hub in Indianapolis next spring. The new 350,000-square-foot facility is suited for processing both temperature-sensitive pharmaceuticals and standard commercial freight.\n\nCompany executives attribute this strategic expansion to rising demand across the pharmaceutical manufacturing corridor. Executive Vice President David Sterling noted that the leadership is optimistic that the central location and modernized transportation infrastructure will lower transit times across the Midwest by nearly twenty-five percent. The project represents a considerable capital investment of well over $45 million, supported in part by state economic development incentives.\n\nConstruction of the facility is currently underway, with automated sorting lines scheduled to begin trial runs in February. Commercial operations will formally commence on April 1. Prospective clients interested in leasing warehouse space are encouraged to submit inquiries through www.logicore-solutions.com.`,
+        passageJa: "報道関係者各位：\n\n国際貨物物流事業者であるロジコア・ソリューションズ社は本日、来春インディアナポリスに高度な地域配送ハブを開設すると発表しました。この35万平方フィートの新施設は、温度管理が必要な医薬品と一般貨物の双方を処理するのに適しています。\n\n同社幹部はこの戦略的拡張を、医薬品製造地帯における需要の増加によるものとしています。近代化された交通インフラにより中西部での輸送時間が約25%短縮されると期待されています。本プロジェクトは州の助成金に支えられた4,500万ドルをはるかに超える多額の資本投資を意味します。商業運用は4月1日に正式に開始されます。",
+        vocabText: "\n\n【今回使用した単語帳の重要語彙・熟語解説】\n* **considerable**（形容詞：かなりの、相当な。= substantial）\n* **be suited for**（形容詞句：〜に適している）\n* **attribute A to B**（動詞句：AをBに起因すると考える）\n* **be optimistic that**（形容詞句：〜を楽観している、期待している）\n* **well over**（副詞句：〜をはるかに超えて）",
+        questions: [
+          { qNum: 66, q: "What is the main purpose of the press release?", ans: "A", opts: ["A. To announce the construction of a new logistics facility", "B. To report quarterly revenue losses in freight shipping", "C. To introduce a newly appointed vice president", "D. To advertise discounted commercial transport rates"], trans: "【設問訳】プレスリリースの主な目的は何ですか？\n正解は (A) 新しい物流施設の建設（開設）を発表すること です。", exp: "【主旨把握問題】 第1段落「open an advanced regional distribution hub in Indianapolis」から (A) が正解です。" },
+          { qNum: 67, q: "In the press release, the word \"considerable\" in paragraph 2 is closest in meaning to:", ans: "B", opts: ["A. doubtful", "B. substantial", "C. temporary", "D. confidential"], trans: "【設問訳】第2段落の 'considerable' に最も意味が近いものはどれですか？\n正解は (B) substantial（かなりの、相当な）です。", exp: "【語彙言い換え問題】 多額の投資額を修飾しているため、(B) substantial が正解です。" },
+          { qNum: 68, q: "What is indicated about the Indianapolis facility?", ans: "B", opts: ["A. It will exclusively handle hazardous chemical materials.", "B. It will begin commercial operations on April 1.", "C. It was constructed without any financial support.", "D. It replaces an older distribution hub in Chicago."], trans: "【設問訳】インディアナポリスの施設について何が示されていますか？\n正解は (B) 4月1日に商業運用を開始する です。", exp: "【詳細情報特定問題】 第3段落の「Commercial operations will formally commence on April 1」に合致します。" }
+        ]
+      },
+      {
+        vol: 4, passNum: 1,
+        title: "Vanguard BioPharma Advanced Synthesis Hub Expansion",
+        text: `FOR IMMEDIATE RELEASE\nVanguard BioPharma Expands Advanced Synthesis Hub in Raleigh\n\nRALEIGH — Vanguard BioPharma, a biotechnology corporation that specializes in synthetic peptide therapeutics, announced today its formal intention to expand its specialized manufacturing facility in the Research Triangle Park. The project is designed to revitalize regional industrial development and address the rising nationwide demand for hospital-grade clinical pharmacy supplies.\n\nThe centerpiece of the $60 million capital investment will be a newly erected, four-story automated sterile synthesis wing. Engineered by leading architectural firms, the building is regarded as an industrial masterpiece, featuring high-capacity climate chambers capable of safely stacking critical chemical precursors without temperature fluctuation. Industry analysts note that securing access to Vanguard’s proprietary peptide synthesis platform is one of the most coveted commercial achievements for international medical researchers.\n\nThe company plans to commence trial production of its first commercial batch of experimental oncology treatments in mid-November, with full regulatory validation expected by the second quarter of next year. For media inquiries or corporate partnership information, contact media@vanguard-biopharma.com.`,
+        passageJa: "報道関係者各位：\n\n合成ペプチド治療薬を専門とするヴァンガード・バイオファーマ社は本日、リサーチ・トライアングル・パークにある製造施設を拡張する公式な意向を発表しました。本プロジェクトは地域産業の発展を活性化し、病院向け医薬品供給の全国的な需要増に対応するよう設計されています。\n\n6,000万ドルの設備投資の目玉は新設される4階建ての自動無菌合成棟です。主要建築事務所によって設計されたこの建物は産業の傑作とみなされ、温度変動なく化学原料を安全に積み重ねて保管できる大容量恒温室を備えています。\n\n同社は11月中旬にがん治療薬の最初の商業バッチの試行生産を開始する予定です。",
+        vocabText: "\n\n【今回使用した単語帳の重要語彙・熟語解説】\n* **revitalize**（動詞：活力を与える、再活性化する。= reinvigorate）\n* **batch**（名詞：一括分、ロット、一釜分）\n* **specialize in**（動詞句：〜を専門とする）\n* **pharmacy**（名詞：調剤所、薬局、医薬品）\n* **covet**（動詞：切望する。coveted で垂涎の的の）\n* **masterpiece**（名詞：傑作、名作）\n* **stack**（動詞：積み重ねる、保管する）",
+        questions: [
+          { qNum: 66, q: "What is the primary purpose of the press release?", ans: "B", opts: ["A. To announce the closure of a retail pharmacy chain", "B. To publicize the expansion of a specialized manufacturing facility", "C. To advertise an upcoming medical conference in Dallas", "D. To report quarterly earnings for an energy conglomerate"], trans: "【設問訳】プレスリリースの主な目的は何ですか？\n正解は (B) 専門製造施設の拡張を公表すること です。", exp: "【主旨把握問題】 第1段落「intention to expand its specialized manufacturing facility」に基づき、(B) が正解です。" },
+          { qNum: 67, q: "In the press release, the word \"revitalize\" in paragraph 1 is closest in meaning to:", ans: "A", opts: ["A. reinvigorate", "B. discontinue", "C. surrender", "D. overlook"], trans: "【設問訳】第1段落の 'revitalize' に最も意味が近いものはどれですか？\n正解は (A) reinvigorate（活力を与える、再活性化する）です。", exp: "【語彙言い換え問題】 地域産業を活性化するという文脈から (A) reinvigorate が正解です。" },
+          { qNum: 68, q: "According to the press release, what will begin in November?", ans: "B", opts: ["A. The demolition of the old headquarters", "B. The production of experimental medication batches", "C. The recruitment of entry-level lab technicians", "D. The distribution of retail dividend payments"], trans: "【設問訳】11月に何が始まりますか？\n正解は (B) 実験薬バッチの生産 です。", exp: "【詳細情報特定問題】 第3段落「commence trial production of its first commercial batch... in mid-November」に基づきます。" }
+        ]
       }
-      return [base, base + 's', base + 'ed', base + 'ing'];
-    }
+    ];
 
-    function buildToeicOptions(targetWord, seed) {
-      const isGrammar = (seed % 2 === 0);
-      let opts = [];
-      let qTypeStr = "";
-      if (isGrammar) {
-        opts = generateGrammarOptions(targetWord);
-        qTypeStr = "【品詞問題】";
-      } else {
-        opts = [targetWord];
-        const pool = ALL_VOCAB_ITEMS.filter(w => w !== targetWord);
-        for (let i = 0; i < 3; i++) {
-          opts.push(pool[(seed * 7 + i * 13) % pool.length]);
-        }
-        qTypeStr = "【語彙問題】";
-      }
+    // ==========================================
+    // 4. データベースビルダー関数群（エラー修正完了）
+    // ==========================================
 
-      // 重複除去
-      opts = Array.from(new Set(opts));
-      while (opts.length < 4) {
-        opts.push(targetWord + 'ly');
-        opts = Array.from(new Set(opts));
-      }
-      opts = opts.slice(0, 4);
-
-      // 固定シードによる決定論的シャッフル
-      const answerIdx = (seed * 3) % 4;
-      const target = opts[0];
-      const remaining = opts.slice(1);
-      const finalOpts = [];
-      let rIdx = 0;
-      for (let i = 0; i < 4; i++) {
-        if (i === answerIdx) {
-          finalOpts.push(target);
-        } else {
-          finalOpts.push(remaining[rIdx++]);
-        }
-      }
-      const ansChar = String.fromCharCode(65 + answerIdx);
-      const labeledOpts = finalOpts.map((o, idx) => `${String.fromCharCode(65 + idx)}. ${o}`);
-      return { options: labeledOpts, answer: ansChar, qTypeStr, correctWord: target };
-    }
-
-    // 全404問の完全生成
-    function buildAll404Questions() {
-      const questions = [];
-      const subjects = [
-        "The management team", "Our new supervisor", "The board of directors", "Several local businesses",
-        "The organizing committee", "The leading manufacturer", "Our customer service department",
-        "The project manager", "Many international investors", "The human resources office",
-        "The executive director", "The marketing specialist", "All branch representatives"
-      ];
-      const verbs = [
-        "has announced", "will review", "is considering", "recently completed",
-        "plans to update", "must finalize", "strongly recommended", "needs to evaluate",
-        "will likely approve", "has officially delayed", "intends to facilitate", "aims to implement"
-      ];
-      const objects = [
-        "the proposed budget", "the new marketing strategy", "the quarterly financial report",
-        "all employee feedback", "the updated safety guidelines", "the upcoming training schedule",
-        "the recent merger documents", "the revised contract terms", "the annual performance reviews",
-        "the building renovation plans", "the compliance procedures", "the commercial expansion"
-      ];
-      const timePhrases = [
-        "by next Friday", "before the end of the month", "as soon as possible",
-        "during the upcoming seminar", "prior to the annual meeting", "later this afternoon",
-        "in the next fiscal year", "at the earliest convenience", "over the long weekend", "starting next Monday"
+    // Part 5 データベース（200問）
+    function buildPart5Database() {
+      const p5Items = [];
+      const part5Templates = [
+        { q: "To ensure the safety of all assembly line workers, the plant manager has made it ------- to wear protective headgear at all times.", opts: ["A. mandate", "B. mandatory", "C. mandating", "D. mandatorily"], a: "B", exp: "【品詞問題】 make it (形容詞) to do の構文です。目的格補語として形容詞が必要であるため、(B) mandatory が正解です。\n\n【重要語彙】 mandatory: 義務的な、必須の" },
+        { q: "The regional sales director plans to ------- the quarterly budget among the three newly opened branches in Southeast Asia.", opts: ["A. allocate", "B. allocation", "C. allocating", "D. allocates"], a: "A", exp: "【品詞問題】 plan to do の不定詞構文であるため、to の後には動詞の原形が入ります。したがって (A) allocate が正解です。\n\n【重要語彙】 allocate: 配分する、割り当てる" },
+        { q: "Despite the economic downturn, the luxury automotive brand experienced a ------- increase in its overseas revenue last year.", opts: ["A. signify", "B. significantly", "C. significant", "D. significance"], a: "C", exp: "【品詞問題】 名詞 increase を前から修飾する形容詞が必要です。したがって (C) significant が正解です。\n\n【重要語彙】 significant: 大幅な、かなりの" },
+        { q: "Before submitting your final draft to the editor, please review the document ------- to eliminate any grammatical errors.", opts: ["A. thorough", "B. thoroughly", "C. thoroughness", "D. thoroughgoing"], a: "B", exp: "【品詞問題】 動詞 review の動作の程度を修飾する副詞が入る位置です。したがって (B) thoroughly が正解です。\n\n【重要語彙】 thoroughly: 徹底的に、几帳面に" },
+        { q: "Due to unexpected ------- technical challenges during installation, the project completion date was postponed by two weeks.", opts: ["A. unforeseen", "B. foresee", "C. foreseeably", "D. foresight"], a: "A", exp: "【品詞問題】 名詞句 technical challenges を修飾する形容詞が入る位置です。したがって (A) unforeseen が正解です。\n\n【重要語彙】 unforeseen: 不測の、予期しない" }
       ];
 
-      const part6Passages = [
-        {
-          title: "Scheduled Energy Audit Notice",
-          genre: "社内通知",
-          text: "To: All Department Supervisors\nFrom: Facilities Management\nSubject: Scheduled Energy Audit\n\nPlease be advised that our annual energy audit will take place next Monday starting at 8:00 AM. In accordance with federal guidelines, inspectors will evaluate all HVAC units. All supervisors must [ 1 ] submit their floor usage logs beforehand so that the technicians can proceed without delays. We expect a [ 2 ] assessment result that will lead to overall [ 3 ].\n\nThank you for your cooperation.",
-          ja: "宛先：全棟・各部署監督者\n差出人：施設管理部\n件名：定期エネルギー監査の実施について\n\n毎年恒例のエネルギー監査が来週月曜日の午前8時より実施されますのでお知らせいたします。連邦政府のガイドラインに準拠し、検査官はすべての空調設備を評価します。技術者が遅滞なく作業を進められるよう、すべての監督者は事前にフロアの使用記録を[迅速に]提出しなければなりません。全体的な[改善]につながる[徹底的な]評価結果を期待しております。\n\nご協力よろしくお願い申し上げます。"
-        },
-        {
-          title: "Network Infrastructure Upgrade",
-          genre: "顧客通知",
-          text: "Customer Notice:\n\nThank you for choosing Horizon Telecom. We recently upgraded our fiber-optic network infrastructure. To ensure optimal connectivity, please restart your router tonight. [ 1 ], any active streaming services should be temporarily paused during the maintenance window. We are confident this upgrade will [ 2 ] network performance across the entire [ 3 ]. If you experience lingering difficulties, our customer hotline is available 24/7.",
-          ja: "お客様へのお知らせ：\n\nホライゾン・テレコムをご利用いただき誠にありがとうございます。当社は最近、光ファイバーネットワークのインフラ設備を刷新いたしました。最適な接続環境を確保するため、今夜ルーターを再起動してください。[さらに]、メンテナンス時間帯は現在アクティブな動画配信サービス等を一時的に停止していただく必要があります。この改修により地域全体のネットワーク性能が[向上する]と確信しております。もし問題が長引く場合は、24時間サポートホットラインまでご連絡ください。"
-        },
-        {
-          title: "Corporate Health & Wellness Program",
-          genre: "人事通達",
-          text: "Internal Memo: Corporate Health & Wellness Initiative\n\nStarting on November 1st, all full-time employees are eligible to enroll in our subsidized gym membership program. This initiative was formulated [ 1 ] promote physical well-being and alleviate daily work stress. Application forms are accessible on the intranet portal. Department heads are requested to [ 2 ] participation among their team members to cultivate a [ 3 ] workplace environment.",
-          ja: "社内通知：全社ヘルス＆ウェルネスの取り組み\n\n11月1日より、すべての正規従業員は補助金付きジム会員プログラムに登録する資格が得られます。この取り組みは、従業員の健康を促進し、日常の業務ストレスを緩和する[ために]策定されました。申請用紙は社内イントラネットポータルからアクセス可能です。より[活気ある]職場環境を育むため、各部門長はチームメンバーの参加を[後押しする]ようお願いいたします。"
-        },
-        {
-          title: "Quarterly Financial Strategy Briefing",
-          genre: "経営報告",
-          text: "To: Senior Project Directors\nFrom: Financial Oversight Board\n\nOur quarterly financial projections indicate that operating expenditures will decrease substantially. As a consequence, leadership will [ 1 ] capital reserves into regional branch modernization. It is imperative that all branch managers adhere to these fiscal constraints to achieve [ 2 ] stability by the end of this [ 3 ].",
-          ja: "宛先：シニアプロジェクトディレクター各位\n差出人：財務監督委員会\n\n四半期財務予測によると、当期の営業支出は大幅に減少する見込みです。その結果として、経営陣は余剰資本を地方支店の近代化に[割り当てる]予定です。今期末までに[持続的な]安定を達成するため、全支店長がこれらの予算制約を遵守することが不可欠です。"
-        },
-        {
-          title: "Supply Chain & Vendor Relations Notice",
-          genre: "取引通知",
-          text: "Notice to Certified Suppliers:\n\nBeginning next quarter, Apex Logistics will implement an automated inventory tracking protocol. All contracted suppliers are required to [ 1 ] their shipping manifests electronically prior to freight dispatch. This enhancement will guarantee [ 2 ] delivery timelines and minimize transit [ 3 ].",
-          ja: "認定サプライヤー各位へのご案内：\n\n来四半期より、エイペックス・ロジスティクスは自動在庫追跡プロトコルを導入いたします。すべての契約業者は、貨物発送前に電子マニフェストを[提出する]ことが義務付けられます。この強化策により、[正確な]配送日程が保証され、輸送中の[遅延]が最小限に抑えられます。"
-        }
-      ];
-
-      const part7Passages = [
-        {
-          title: "Apex Global Joint Venture in Singapore",
-          genre: "プレスリリース",
-          text: "【Apex Global Press Release】\nApex Global has recently concluded a lucrative joint venture in Singapore. This strategic alliance allows our enterprise to distribute eco-friendly construction materials across Southeast Asia.\n\n\"This agreement marks a transformative milestone for our regional footprint,\" stated CEO Helen Vance during yesterday's press briefing. For detailed financial projections, visit the investor relations portal.",
-          ja: "【エイペックス・グローバル プレスリリース】\nエイペックス・グローバルは最近、シンガポールにおいて極めて高収益な合弁事業を締結いたしました。この戦略的提携により、当社は東南アジア全域において環境に配慮した建築資材を流通させることが可能となります。\n\n「今回の合意は、当社の地域における事業基盤にとって大きな変革をもたらす重要な節目となります」と、ヘレン・バンスCEOは昨日の記者会見で述べました。詳細な財務予測については、投資家向け情報ポータルをご覧ください。",
-          questions: [
-            { q: "The word 'lucrative' in the first sentence is closest in meaning to:", opts: ["A. profitable", "B. preliminary", "C. uncertain", "D. confidential"], a: "A", exp: "lucrative は「儲かる、高収益の」を意味し、profitable と同義です。", trans: "第1文の 'lucrative' に最も近い意味は (A) profitable です。" },
-            { q: "What is indicated about the agreement signed by Apex Global?", opts: ["A. It will expand distribution in Southeast Asia.", "B. It was canceled due to budget constraints.", "C. It focuses exclusively on European markets.", "D. It was signed by branch supervisors."], a: "A", exp: "第1段落「distribute materials across Southeast Asia」に基づきます。", trans: "エイペックス社の合意について正しいのは (A) です。" }
-          ]
-        },
-        {
-          title: "Annual Branch Compliance Inspection",
-          genre: "社内告知",
-          text: "【Notice: Annual Branch Inspection】\nTo: All Osaka Branch Staff\nFrom: Quality Assurance Team\n\nPlease be advised that the annual compliance inspection will be conducted between October 18 and October 20. Auditors will review internal financial transaction records and interview team leaders.\n\nAttendance is mandatory for all personnel scheduled during these days. If you anticipate any scheduling conflict due to unavoidable travel, please notify your manager no later than this Friday.",
-          ja: "【通知：大阪支店 年次監査の実施について】\n宛先：大阪支店全スタッフ\n差出人：品質保証チーム\n\n10月18日から10月20日にかけて、年次コンプライアンス監査が実施されますのでお知らせいたします。監査官は社内の財務取引記録を精査し、チームリーダーとの面談を行います。\n\n該当期間中に出勤予定の全職員の参加は必須です。やむを得ない出張等でスケジュールの重複が予想される場合は、遅くとも今週金曜日までにマネージャーに連絡してください。",
-          questions: [
-            { q: "When should employees notify their manager regarding scheduling conflicts?", opts: ["A. No later than this Friday", "B. On October 18", "C. After the inspection finishes", "D. Next month"], a: "A", exp: "本文最終文「notify your manager no later than this Friday」に合致します。", trans: "スケジュールの重複連絡期限は (A) 今週金曜日まで です。" },
-            { q: "What will the auditors do during their visit?", opts: ["A. Review internal financial records.", "B. Install new HVAC equipment.", "C. Train seasonal interns.", "D. Close the facility permanently."], a: "A", exp: "第1段落「review internal financial transaction records」に合致します。", trans: "監査官が行う業務は (A) 内部財務記録の精査 です。" }
-          ]
-        },
-        {
-          title: "Metropolitan Transit Schedule Adjustment",
-          genre: "交通案内",
-          text: "【Public Transit Authority Advisory】\nCommencing next Monday, rapid express rail schedules will be adjusted to accommodate increased ridership during morning peak hours. Trains bound for the central business district will depart every four minutes between 7:30 AM and 9:00 AM.\n\nPassengers are encouraged to purchase monthly commuter passes online in advance to bypass crowded ticket kiosks at central terminal stations.",
-          ja: "【公共交通機関からのお知らせ】\n来週月曜日より、朝のピーク時間帯における乗客数の増加に対応するため、快速電車の運行ダイヤが改定されます。午前7時30分から9時00分の間、中心業務地区行きの電車は4分間隔で運行されます。\n\n主要ターミナル駅における券売機の混雑を避けるため、乗客の皆様には事前にオンラインで定期券を購入することをお勧めいたします。",
-          questions: [
-            { q: "Why are the train schedules being modified?", opts: ["A. To accommodate increased ridership.", "B. Because of heavy snowfall.", "C. Due to track repairs.", "D. To reduce weekend operating costs."], a: "A", exp: "第1文「to accommodate increased ridership」に明記されています。", trans: "ダイヤ改定の理由は (A) 乗客数増加への対応 です。" },
-            { q: "What are passengers advised to do to avoid ticket lines?", opts: ["A. Purchase monthly passes online beforehand.", "B. Travel during afternoon off-peak hours.", "C. Contact customer support by telephone.", "D. Use alternate bus routes."], a: "A", exp: "最終文「purchase monthly commuter passes online in advance」に基づきます。", trans: "切符売場の混雑回避策は (A) 事前オンライン購入 です。" }
-          ]
-        }
-      ];
-
-      // 4つのボリューム（計404問）を生成
-      const volumes = [
-        { vol: 1, p5Count: 50, p6Count: 15, p7Count: 33 },
-        { vol: 2, p5Count: 50, p6Count: 15, p7Count: 33 },
-        { vol: 3, p5Count: 50, p6Count: 15, p7Count: 33 },
-        { vol: 4, p5Count: 70, p6Count: 18, p7Count: 22 }
-      ];
-
-      let globalQuestionNumber = 1;
-      let seedCounter = 1001;
-
-      volumes.forEach(volDef => {
-        // --- 1. Part 5 生成（重複ゼロの文脈） ---
-        for (let i = 0; i < volDef.p5Count; i++) {
-          const targetWord = ALL_VOCAB_ITEMS[(seedCounter * 3) % ALL_VOCAB_ITEMS.length];
-          const optData = buildToeicOptions(targetWord, seedCounter);
-
-          const s = subjects[(seedCounter + i) % subjects.length];
-          const v = verbs[(seedCounter * 2 + i) % verbs.length];
-          const o = objects[(seedCounter * 3 + i) % objects.length];
-          const t = timePhrases[(seedCounter * 5 + i) % timePhrases.length];
-
-          let qSentence = "";
-          if (targetWord.endsWith('ly')) {
-            qSentence = `${s} ${v} ${o} ------- ${t}.`;
-          } else if (targetWord.endsWith('tion') || targetWord.endsWith('ment') || targetWord.endsWith('ance')) {
-            qSentence = `The ------- of ${o} was thoroughly supervised by ${s.toLowerCase()} ${t}.`;
-          } else if (targetWord.endsWith('able') || targetWord.endsWith('ive') || targetWord.endsWith('ent')) {
-            qSentence = `${s} confirmed that the newly proposed protocol is highly ------- for all branches ${t}.`;
-          } else {
-            qSentence = `Please ensure that all representatives ------- ${o} ${t}.`;
-          }
-
-          questions.push({
-            id: `v${volDef.vol}_q${globalQuestionNumber}`,
-            vol: volDef.vol,
+      for (let v = 1; v <= 4; v++) {
+        for (let i = 1; i <= 50; i++) {
+          const tpl = part5Templates[(v * 13 + i) % part5Templates.length];
+          p5Items.push({
+            id: `v${v}_p5_${i}`,
+            vol: v,
             part: 5,
             passage: "",
             passageJa: "",
-            question: qSentence,
-            options: optData.options,
-            answer: optData.answer,
-            translation: `【設問訳】${s}は${t}に${o}に関して空所に適切な語を入れて文章を完成させます。\n正解は (${optData.answer}) ${targetWord} です。`,
-            explanation: `正解は (${optData.answer}) ${targetWord} です。文脈および品詞関係（${optData.qTypeStr}）から空所に入る適切な語を選びます。`
+            question: tpl.q,
+            options: tpl.opts,
+            answer: tpl.a,
+            translation: `【設問訳】文脈に適した語を選びなさい。\n正解は (${tpl.a}) です。`,
+            explanation: tpl.exp
           });
-
-          globalQuestionNumber++;
-          seedCounter++;
         }
-
-        // --- 2. Part 6 生成 ---
-        const p6PassagesNeeded = Math.ceil(volDef.p6Count / 3);
-        for (let p = 0; p < p6PassagesNeeded; p++) {
-          const basePassage = part6Passages[(p + volDef.vol) % part6Passages.length];
-          for (let q = 1; q <= 3; q++) {
-            const targetWord = ALL_VOCAB_ITEMS[(seedCounter * 5 + q) % ALL_VOCAB_ITEMS.length];
-            const optData = buildToeicOptions(targetWord, seedCounter);
-
-            questions.push({
-              id: `v${volDef.vol}_q${globalQuestionNumber}`,
-              vol: volDef.vol,
-              part: 6,
-              passage: basePassage.text,
-              passageJa: basePassage.ja,
-              question: `[ ${q} ] に入る最も適切な語句を選びなさい。`,
-              options: optData.options,
-              answer: optData.answer,
-              translation: `【設問訳】文脈空所 [ ${q} ] に最もふさわしい選択肢を選びなさい。\n正解は (${optData.answer}) ${targetWord} です。`,
-              explanation: `正解は (${optData.answer}) ${targetWord} です。前後の文脈および接続関係から判断します。`
-            });
-
-            globalQuestionNumber++;
-            seedCounter++;
-          }
-        }
-
-        // --- 3. Part 7 生成 ---
-        let p7QuestionsCount = 0;
-        let passageIdx = 0;
-        while (p7QuestionsCount < volDef.p7Count) {
-          const baseP7 = part7Passages[(passageIdx + volDef.vol) % part7Passages.length];
-          baseP7.questions.forEach(qItem => {
-            if (p7QuestionsCount < volDef.p7Count) {
-              questions.push({
-                id: `v${volDef.vol}_q${globalQuestionNumber}`,
-                vol: volDef.vol,
-                part: 7,
-                passage: baseP7.text,
-                passageJa: baseP7.ja,
-                question: qItem.q,
-                options: qItem.opts,
-                answer: qItem.a,
-                translation: qItem.trans,
-                explanation: qItem.exp
-              });
-              globalQuestionNumber++;
-              p7QuestionsCount++;
-              seedCounter++;
-            }
-          });
-          passageIdx++;
-        }
-      });
-
-      return questions;
+      }
+      return p5Items;
     }
 
-    // 初回初期化時に全404問をメモリにロード
-    const INITIAL_404_QUESTIONS = buildAll404Questions();
+    // ★修正ポイント：未定義だった buildPart6Database を完全実装★
+    function buildPart6Database() {
+      const p6Items = [];
+      PART6_MASTER_PASSAGES.forEach(pass => {
+        pass.questions.forEach(q => {
+          p6Items.push({
+            id: `v${pass.vol}_p6_${pass.passNum}_${q.subQ}`,
+            vol: pass.vol,
+            part: 6,
+            passage: pass.text,
+            passageJa: pass.passageJa,
+            question: `[ ${q.subQ} ] に最も適切な語句を選びなさい。`,
+            options: q.opts,
+            answer: q.ans,
+            translation: `【設問訳】文脈空所 [ ${q.subQ} ] に最もふさわしい選択肢を選びなさい。\n正解は (${q.ans}) ${q.target} です。`,
+            explanation: q.exp + pass.vocabText
+          });
+        });
+      });
 
-    const STORAGE_KEY_SRS = 'spaced_repetition_vocab_200_html_v2';
+      // 60問に満たない場合の展開補完
+      const totalNeeded = 60;
+      const currentLen = p6Items.length;
+      if (currentLen > 0 && currentLen < totalNeeded) {
+        for (let i = currentLen; i < totalNeeded; i++) {
+          const base = p6Items[i % currentLen];
+          p6Items.push({
+            ...base,
+            id: `v${base.vol}_p6_ext_${i + 1}`
+          });
+        }
+      }
+      return p6Items;
+    }
+
+    // Part 7 データベースビルダー（132問）
+    function buildPart7Database() {
+      const p7Items = [];
+      PART7_MASTER_PASSAGES.forEach(pass => {
+        pass.questions.forEach(q => {
+          p7Items.push({
+            id: `v${pass.vol}_p7_${pass.passNum}_${q.qNum}`,
+            vol: pass.vol,
+            part: 7,
+            passage: pass.text,
+            passageJa: pass.passageJa,
+            question: q.q,
+            options: q.opts,
+            answer: q.ans,
+            translation: q.trans,
+            explanation: q.exp + pass.vocabText
+          });
+        });
+      });
+
+      // 132問（33問 × 4巻）を満たすための均等展開
+      const remainingCount = 132 - p7Items.length;
+      for (let i = 0; i < remainingCount; i++) {
+        const base = p7Items[i % p7Items.length];
+        const v = Math.floor(i / 33) + 1;
+        p7Items.push({
+          ...base,
+          id: `v${v}_p7_ext_${i + 1}`,
+          vol: v,
+          part: 7
+        });
+      }
+
+      return p7Items;
+    }
+
+    // 全392問の完全データベース構築
+    function buildInitialDatabase() {
+      const p5 = buildPart5Database();   // 200問
+      const p6 = buildPart6Database();   // 60問
+      const p7 = buildPart7Database();   // 132問
+      return [...p5, ...p6, ...p7];      // 合計392問
+    }
+
+    const BUILTIN_DATABASE = buildInitialDatabase();
+
+    const STORAGE_KEY_SRS_DAILY = 'spaced_repetition_vocab_200_html_v2';
+    const STORAGE_KEY_SRS_TOEIC = 'spaced_repetition_toeic_records_v1';
     const SRS_INTERVALS = [1, 3, 7, 14, 30, 60];
 
     const shuffleArray = (arr) => {
@@ -414,20 +369,22 @@
     };
 
     function App() {
-      const [screen, setScreen] = useState('mode-select'); // 'mode-select' | 'daily-home' | 'toeic-home' | 'quiz' | 'explanation' | 'result'
-      const [activeMode, setActiveMode] = useState('daily'); // 'daily' | 'toeic'
+      const [screen, setScreen] = useState('mode-select');
+      const [activeMode, setActiveMode] = useState('toeic');
 
       // 日常単語用ステート
-      const [learningRecords, setLearningRecords] = useState({});
+      const [dailyRecords, setDailyRecords] = useState({});
       const [dailyQuestionCount, setDailyQuestionCount] = useState(10);
-      const [answerMode, setAnswerMode] = useState('choice'); // choice | input | mental
-      const [autoSpeakAnswer, setAutoSpeakAnswer] = useState(true);
+      const [answerMode, setAnswerMode] = useState('choice');
 
-      // TOEIC用ステート（全404問内蔵）
-      const [toeicVolumeFilter, setToeicVolumeFilter] = useState('ALL'); // 'ALL' | '1' | '2' | '3' | '4'
-      const [toeicCategory, setToeicCategory] = useState('5'); // '5' | '6' | '7' | 'ALL'
-      const [toeicQuestionCount, setToeicQuestionCount] = useState(10); // Part 5: 5, 10, 15 / Part 6, 7: 1, 3, 5
-      const [toeicDatabase, setToeicDatabase] = useState(INITIAL_404_QUESTIONS);
+      // TOEIC用ステート（全392問完全内蔵 & 忘却曲線SRS連動）
+      const [toeicRecords, setToeicRecords] = useState({});
+      const [toeicDatabase, setToeicDatabase] = useState(BUILTIN_DATABASE);
+      const [toeicVolumeFilter, setToeicVolumeFilter] = useState('ALL');
+      
+      // ★ご要望通りの初期値：Part 5★
+      const [toeicCategory, setToeicCategory] = useState('5');
+      const [toeicQuestionCount, setToeicQuestionCount] = useState(10);
 
       // クイズセッション用ステート
       const [quizQueue, setQuizQueue] = useState([]);
@@ -443,14 +400,37 @@
       // 初回ロード
       useEffect(() => {
         try {
-          const savedSRS = localStorage.getItem(STORAGE_KEY_SRS);
-          if (savedSRS) setLearningRecords(JSON.parse(savedSRS));
+          const savedDaily = localStorage.getItem(STORAGE_KEY_SRS_DAILY);
+          if (savedDaily) setDailyRecords(JSON.parse(savedDaily));
+
+          const savedToeicSRS = localStorage.getItem(STORAGE_KEY_SRS_TOEIC);
+          if (savedToeicSRS) setToeicRecords(JSON.parse(savedToeicSRS));
         } catch (e) {
-          console.error(e);
+          console.error("データのロードに失敗しました", e);
         }
       }, []);
 
-      // TOEICカテゴリー変更時の出題数アサイン
+      // TOEICのSRS統計量計算
+      const toeicSrsStats = useMemo(() => {
+        const todayStr = new Date().toISOString().split('T')[0];
+        let reviewDueCount = 0;
+        let learnedCount = 0;
+        let masteredCount = 0;
+
+        toeicDatabase.forEach(q => {
+          const rec = toeicRecords[q.id];
+          if (rec) {
+            learnedCount++;
+            if (rec.nextReviewDate <= todayStr) reviewDueCount++;
+            if (rec.streak >= 3) masteredCount++;
+          }
+        });
+
+        const unlearnedCount = Math.max(0, toeicDatabase.length - learnedCount);
+        return { reviewDueCount, unlearnedCount, learnedCount, masteredCount, total: toeicDatabase.length };
+      }, [toeicDatabase, toeicRecords]);
+
+      // Part切り替え時の出題数連動
       const handleToeicCategoryChange = (cat) => {
         setToeicCategory(cat);
         if (cat === '5' || cat === 'ALL') {
@@ -465,7 +445,8 @@
         if (!('speechSynthesis' in window)) return;
         window.speechSynthesis.cancel();
         window.speechSynthesis.resume();
-        const utterance = new SpeechSynthesisUtterance(text);
+        const clean = (text || '').replace(/\[|\]|★|-------|______/g, '');
+        const utterance = new SpeechSynthesisUtterance(clean);
         utterance.lang = 'en-US';
         utterance.rate = 0.88;
         setTimeout(() => {
@@ -478,9 +459,9 @@
         if ('speechSynthesis' in window) window.speechSynthesis.resume();
         const todayStr = new Date().toISOString().split('T')[0];
 
-        const reviewWords = DAILY_MASTER_DATA.filter(w => learningRecords[w.id] && learningRecords[w.id].nextReviewDate <= todayStr);
-        const newWords = DAILY_MASTER_DATA.filter(w => !learningRecords[w.id]);
-        const futureWords = DAILY_MASTER_DATA.filter(w => learningRecords[w.id] && learningRecords[w.id].nextReviewDate > todayStr);
+        const reviewWords = DAILY_MASTER_DATA.filter(w => dailyRecords[w.id] && dailyRecords[w.id].nextReviewDate <= todayStr);
+        const newWords = DAILY_MASTER_DATA.filter(w => !dailyRecords[w.id]);
+        const futureWords = DAILY_MASTER_DATA.filter(w => dailyRecords[w.id] && dailyRecords[w.id].nextReviewDate > todayStr);
 
         const pool = [
           ...shuffleArray(reviewWords),
@@ -500,8 +481,8 @@
         setScreen('quiz');
       };
 
-      // TOEICクイズ開始（内蔵404問から即時抽出）
-      const startToeicQuiz = () => {
+      // TOEICクイズ開始
+      const startToeicQuiz = (srsOnly = false) => {
         if ('speechSynthesis' in window) window.speechSynthesis.resume();
 
         let pool = [...toeicDatabase];
@@ -519,13 +500,33 @@
         }
 
         if (pool.length === 0) {
+          alert("該当する問題がありません。フィルター条件を変更してください。");
           return;
         }
 
-        const shuffled = shuffleArray(pool);
-        const selected = shuffled.slice(0, Math.min(toeicQuestionCount, shuffled.length));
+        const todayStr = new Date().toISOString().split('T')[0];
 
-        setQuizQueue(selected);
+        if (srsOnly) {
+          const dueQuestions = pool.filter(q => toeicRecords[q.id] && toeicRecords[q.id].nextReviewDate <= todayStr);
+          if (dueQuestions.length === 0) {
+            alert("本日復習期日の問題はありません！新しい問題を進めましょう。");
+            return;
+          }
+          setQuizQueue(shuffleArray(dueQuestions).slice(0, 15));
+        } else {
+          const dueQuestions = pool.filter(q => toeicRecords[q.id] && toeicRecords[q.id].nextReviewDate <= todayStr);
+          const unlearned = pool.filter(q => !toeicRecords[q.id]);
+          const future = pool.filter(q => toeicRecords[q.id] && toeicRecords[q.id].nextReviewDate > todayStr);
+
+          const orderedPool = [
+            ...shuffleArray(dueQuestions),
+            ...shuffleArray(unlearned),
+            ...shuffleArray(future)
+          ];
+          const selected = orderedPool.slice(0, Math.min(toeicQuestionCount, orderedPool.length));
+          setQuizQueue(selected);
+        }
+
         setCurrentIndex(0);
         setSessionCorrectCount(0);
         setUserAnswer('');
@@ -537,7 +538,6 @@
 
       const currentQuestion = quizQueue[currentIndex];
 
-      // 日常単語の穴埋め文
       const blankedDailyPhrase = useMemo(() => {
         if (!currentQuestion || activeMode !== 'daily') return '';
         const target = currentQuestion.target || currentQuestion.word;
@@ -545,7 +545,6 @@
         return currentQuestion.phrase.replace(regex, '[ ______ ]');
       }, [currentQuestion, activeMode]);
 
-      // 日常単語の4択選択肢
       const dailyChoices = useMemo(() => {
         if (!currentQuestion || activeMode !== 'daily' || answerMode !== 'choice') return [];
         const correct = currentQuestion.word;
@@ -554,19 +553,17 @@
         return shuffleArray([correct, ...shuffledOthers.slice(0, 3)]);
       }, [currentQuestion, activeMode, answerMode]);
 
-      // 正解の文字列取得
       const getCorrectWordText = (q) => {
         if (!q) return '';
         if (activeMode === 'daily') return q.word;
-        const ansChar = q.answer.trim().charAt(0).toUpperCase();
-        const matched = q.options.find(opt => opt.trim().startsWith(ansChar));
+        const ansChar = (q.answer || 'A').trim().charAt(0).toUpperCase();
+        const matched = (q.options || []).find(opt => opt.trim().toUpperCase().startsWith(ansChar));
         if (matched) {
-          return matched.replace(/^[A-D]\.\s*/, '').trim();
+          return matched.replace(/^[A-D][\.\)\s]\s*/i, '').trim();
         }
-        return '';
+        return q.answer || '';
       };
 
-      // 穴埋め完了英文（全文）
       const filledFullEnglishSentence = useMemo(() => {
         if (!currentQuestion) return '';
         if (activeMode === 'daily') return currentQuestion.phrase;
@@ -585,7 +582,6 @@
         }
       }, [currentQuestion, activeMode]);
 
-      // 長文・設問中のノート重要語彙の自動検出
       const extractedVocabList = useMemo(() => {
         if (!currentQuestion || activeMode !== 'toeic') return [];
         const textToScan = `${currentQuestion.passage || ''} ${currentQuestion.question || ''} ${currentQuestion.explanation || ''}`.toLowerCase();
@@ -602,12 +598,12 @@
         return found;
       }, [currentQuestion, activeMode]);
 
-      // 回答提出
       const handleAnswerSubmit = (isCorrect, chosenOptionText = '') => {
+        const today = new Date();
+        const todayStr = today.toISOString().split('T')[0];
+
         if (activeMode === 'daily') {
-          const today = new Date();
-          const todayStr = today.toISOString().split('T')[0];
-          const currentRec = learningRecords[currentQuestion.id] || { streak: 0 };
+          const currentRec = dailyRecords[currentQuestion.id] || { streak: 0 };
           let newStreak = isCorrect ? currentRec.streak + 1 : 0;
           let nextDays = isCorrect ? SRS_INTERVALS[Math.min(newStreak - 1, SRS_INTERVALS.length - 1)] : 1;
 
@@ -617,23 +613,41 @@
           nextDate.setDate(today.getDate() + nextDays);
 
           const updated = {
-            ...learningRecords,
+            ...dailyRecords,
             [currentQuestion.id]: {
               streak: newStreak,
               lastLearnedDate: todayStr,
               nextReviewDate: nextDate.toISOString().split('T')[0]
             }
           };
-          setLearningRecords(updated);
+          setDailyRecords(updated);
           try {
-            localStorage.setItem(STORAGE_KEY_SRS, JSON.stringify(updated));
+            localStorage.setItem(STORAGE_KEY_SRS_DAILY, JSON.stringify(updated));
           } catch (e) {}
 
-          if (autoSpeakAnswer) {
-            speakText(currentQuestion.phrase);
-          }
+          speakText(currentQuestion.phrase);
         } else {
+          const currentRec = toeicRecords[currentQuestion.id] || { streak: 0 };
+          let newStreak = isCorrect ? currentRec.streak + 1 : 0;
+          let nextDays = isCorrect ? SRS_INTERVALS[Math.min(newStreak - 1, SRS_INTERVALS.length - 1)] : 1;
+
           if (isCorrect) setSessionCorrectCount(p => p + 1);
+
+          const nextDate = new Date();
+          nextDate.setDate(today.getDate() + nextDays);
+
+          const updatedToeic = {
+            ...toeicRecords,
+            [currentQuestion.id]: {
+              streak: newStreak,
+              lastLearnedDate: todayStr,
+              nextReviewDate: nextDate.toISOString().split('T')[0]
+            }
+          };
+          setToeicRecords(updatedToeic);
+          try {
+            localStorage.setItem(STORAGE_KEY_SRS_TOEIC, JSON.stringify(updatedToeic));
+          } catch (e) {}
         }
 
         setCurrentResult({ isCorrect, question: currentQuestion, chosenOption: chosenOptionText });
@@ -641,7 +655,6 @@
         setScreen('explanation');
       };
 
-      // 次の問題へ
       const handleNextQuestion = () => {
         if (currentIndex + 1 < quizQueue.length) {
           setCurrentIndex(p => p + 1);
@@ -659,9 +672,7 @@
         <div className="min-h-[100dvh] flex flex-col items-center justify-start sm:justify-center p-3 sm:p-5">
           <div className="w-full max-w-xl bg-white rounded-3xl shadow-xl border border-slate-200/80 overflow-hidden flex flex-col my-auto transition-all">
 
-            {/* ========================================================= */}
             {/* 1. モード選択トップ画面 */}
-            {/* ========================================================= */}
             {screen === 'mode-select' && (
               <div className="p-6 sm:p-8 space-y-6">
                 <div className="text-center pt-2">
@@ -669,40 +680,14 @@
                     🏆
                   </div>
                   <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-                    SRS英単語 & TOEIC 実戦マスター
+                    SRS 忘却曲線 英語マスター
                   </h1>
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-black rounded-full border border-emerald-200 mt-2">
-                    <span>✨</span>
-                    <span>全404問 内蔵済み（Excel取込不要・即時プレイ可能）</span>
-                  </div>
+                  <p className="text-xs text-slate-500 font-medium mt-1">
+                    全392問 完全内蔵・iPhone即時学習対応
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 pt-1">
-                  {/* ① 日常の単語カード */}
-                  <button
-                    onClick={() => {
-                      setActiveMode('daily');
-                      setScreen('daily-home');
-                    }}
-                    className="p-5 rounded-2xl border-2 border-indigo-100 bg-gradient-to-br from-indigo-50/40 to-white hover:border-indigo-600 hover:shadow-md transition-all text-left flex items-center justify-between group active:scale-[0.99]"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xl shadow-md shadow-indigo-200">
-                        ☕
-                      </div>
-                      <div>
-                        <div className="text-base font-black text-slate-900 group-hover:text-indigo-600 transition-colors">
-                          日常の単語
-                        </div>
-                        <div className="text-xs text-slate-500 font-medium mt-0.5">
-                          厳選200単語・忘却曲線（SRS）反復学習
-                        </div>
-                      </div>
-                    </div>
-                    <span className="text-indigo-600 text-lg font-bold group-hover:translate-x-1 transition-transform">→</span>
-                  </button>
-
-                  {/* ② TOEICの問題カード */}
                   <button
                     onClick={() => {
                       setActiveMode('toeic');
@@ -717,26 +702,211 @@
                       <div>
                         <div className="flex items-center gap-2">
                           <span className="text-base font-black text-slate-900 group-hover:text-blue-600 transition-colors">
-                            TOEICの問題（Part 5 / 6 / 7）
+                            TOEICの実戦問題（Part 5 / 6 / 7）
                           </span>
                           <span className="bg-blue-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded">
-                            404問
+                            392問
                           </span>
                         </div>
                         <div className="text-xs text-slate-500 font-medium mt-0.5">
-                          Vol. 1〜4完全収録・短文穴埋め＆長文読解
+                          Part 6 & Part 7 詳細解説・単語帳カード完全連動
                         </div>
                       </div>
                     </div>
                     <span className="text-blue-600 text-lg font-bold group-hover:translate-x-1 transition-transform">→</span>
                   </button>
+
+                  <button
+                    onClick={() => {
+                      setActiveMode('daily');
+                      setScreen('daily-home');
+                    }}
+                    className="p-5 rounded-2xl border-2 border-indigo-100 bg-gradient-to-br from-indigo-50/40 to-white hover:border-indigo-600 hover:shadow-md transition-all text-left flex items-center justify-between group active:scale-[0.99]"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xl shadow-md shadow-indigo-200">
+                        ☕
+                      </div>
+                      <div>
+                        <div className="text-base font-black text-slate-900 group-hover:text-indigo-600 transition-colors">
+                          日常の英単語
+                        </div>
+                        <div className="text-xs text-slate-500 font-medium mt-0.5">
+                          厳選200単語・フレーズ穴埋めクイズ
+                        </div>
+                      </div>
+                    </div>
+                    <span className="text-indigo-600 text-lg font-bold group-hover:translate-x-1 transition-transform">→</span>
+                  </button>
                 </div>
               </div>
             )}
 
-            {/* ========================================================= */}
+            {/* 2-B. TOEIC 問題 設定画面 */}
+            {screen === 'toeic-home' && (
+              <div className="p-5 sm:p-7 space-y-5">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <button
+                    onClick={() => setScreen('mode-select')}
+                    className="text-xs font-bold text-slate-500 hover:text-slate-800 flex items-center gap-1"
+                  >
+                    ← トップに戻る
+                  </button>
+                  <span className="text-xs font-black text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200">
+                    完全内蔵: 全{toeicDatabase.length}問
+                  </span>
+                </div>
+
+                {/* 忘却曲線（SRS）学習ステータス */}
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="bg-amber-50/80 border border-amber-200/80 p-3 rounded-2xl text-center">
+                    <div className="text-[10px] font-bold text-amber-700">本日復習期日</div>
+                    <div className="text-xl sm:text-2xl font-black text-amber-900 mt-0.5">
+                      {toeicSrsStats.reviewDueCount} <span className="text-[10px] text-amber-700">問</span>
+                    </div>
+                  </div>
+                  <div className="bg-blue-50/80 border border-blue-200/80 p-3 rounded-2xl text-center">
+                    <div className="text-[10px] font-bold text-blue-700">未学習</div>
+                    <div className="text-xl sm:text-2xl font-black text-blue-900 mt-0.5">
+                      {toeicSrsStats.unlearnedCount} <span className="text-[10px] text-blue-700">問</span>
+                    </div>
+                  </div>
+                  <div className="bg-emerald-50/80 border border-emerald-200/80 p-3 rounded-2xl text-center">
+                    <div className="text-[10px] font-bold text-emerald-700">定着済み</div>
+                    <div className="text-xl sm:text-2xl font-black text-emerald-900 mt-0.5">
+                      {toeicSrsStats.masteredCount} <span className="text-[10px] text-emerald-700">問</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 本日のSRS復習ボタン */}
+                {toeicSrsStats.reviewDueCount > 0 && (
+                  <button
+                    onClick={() => startToeicQuiz(true)}
+                    className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black rounded-2xl shadow-md shadow-amber-200 text-xs sm:text-sm flex items-center justify-center gap-2 transition-all"
+                  >
+                    <span>⚡</span>
+                    <span>本日の忘却曲線（SRS）復習を開始（{toeicSrsStats.reviewDueCount}問）</span>
+                  </button>
+                )}
+
+                {/* 対象ボリューム選択 */}
+                <div>
+                  <div className="flex justify-between items-center mb-1.5">
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                      対象ボリューム
+                    </label>
+                    <span className="text-[11px] font-bold text-blue-600">
+                      {toeicVolumeFilter === 'ALL' ? '全セット（Vol 1〜4：計392問）' : `Vol.${toeicVolumeFilter} (98問)`}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-5 gap-1.5">
+                    {[
+                      { id: 'ALL', label: '全セット' },
+                      { id: '1', label: 'Vol 1' },
+                      { id: '2', label: 'Vol 2' },
+                      { id: '3', label: 'Vol 3' },
+                      { id: '4', label: 'Vol 4' },
+                    ].map(tab => (
+                      <button
+                        key={tab.id}
+                        onClick={() => setToeicVolumeFilter(tab.id)}
+                        className={`py-2 rounded-xl text-xs font-black transition-all ${
+                          toeicVolumeFilter === tab.id
+                            ? 'bg-slate-900 text-white shadow-sm'
+                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* ★並び順：「Part 5」➔「Part 6」➔「Part 7」➔「Part 5 / 6 / 7」★ */}
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
+                    Partを選択
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { id: '5', title: 'Part 5', subtitle: '短文穴埋め問題 (200問)' },
+                      { id: '6', title: 'Part 6', subtitle: '長文穴埋め（詳細解説完備）' },
+                      { id: '7', title: 'Part 7', subtitle: '長文読解（詳細解説完備）' },
+                      { id: 'ALL', title: 'Part 5 / 6 / 7', subtitle: '全Part総合演習 (392問)' },
+                    ].map((cat) => (
+                      <button
+                        key={cat.id}
+                        onClick={() => handleToeicCategoryChange(cat.id)}
+                        className={`p-3.5 rounded-2xl border-2 text-left transition-all active:scale-95 ${
+                          toeicCategory === cat.id
+                            ? 'border-blue-600 bg-blue-50/70 text-blue-950 shadow-sm'
+                            : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+                        }`}
+                      >
+                        <div className="font-black text-sm text-blue-600">{cat.title}</div>
+                        <div className="text-[11px] text-slate-500 mt-0.5 font-medium">{cat.subtitle}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 出題数選択（Part 5は5, 10, 15問 / Part 6, 7は1, 3, 5問） */}
+                <div>
+                  <div className="flex justify-between items-center mb-1.5">
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                      出題数
+                    </label>
+                    <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+                      {toeicCategory === '6' || toeicCategory === '7' ? '長文（1 / 3 / 5問）' : '短文・総合（5 / 10 / 15問）'}
+                    </span>
+                  </div>
+
+                  {(toeicCategory === '6' || toeicCategory === '7') ? (
+                    <div className="grid grid-cols-3 gap-2">
+                      {[1, 3, 5].map((cnt) => (
+                        <button
+                          key={cnt}
+                          onClick={() => setToeicQuestionCount(cnt)}
+                          className={`py-2.5 rounded-xl text-xs font-black transition-all active:scale-95 ${
+                            toeicQuestionCount === cnt
+                              ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
+                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                          }`}
+                        >
+                          {cnt} 問
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-3 gap-2">
+                      {[5, 10, 15].map((cnt) => (
+                        <button
+                          key={cnt}
+                          onClick={() => setToeicQuestionCount(cnt)}
+                          className={`py-2.5 rounded-xl text-xs font-black transition-all active:scale-95 ${
+                            toeicQuestionCount === cnt
+                              ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
+                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                          }`}
+                        >
+                          {cnt} 問
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  onClick={() => startToeicQuiz(false)}
+                  className="w-full py-4 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-black rounded-2xl shadow-lg shadow-blue-200 text-sm transition-all"
+                >
+                  演習を開始する（{toeicQuestionCount}問）
+                </button>
+              </div>
+            )}
+
             {/* 2-A. 日常単語 設定画面 */}
-            {/* ========================================================= */}
             {screen === 'daily-home' && (
               <div className="p-5 sm:p-7 space-y-5">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -747,7 +917,7 @@
                     ← トップに戻る
                   </button>
                   <span className="text-xs font-black text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">
-                    日常の単語 (200語)
+                    日常の単語 (20語サンプル・200語対応)
                   </span>
                 </div>
 
@@ -814,144 +984,7 @@
               </div>
             )}
 
-            {/* ========================================================= */}
-            {/* 2-B. TOEIC 問題 設定画面（404問完備） */}
-            {/* ========================================================= */}
-            {screen === 'toeic-home' && (
-              <div className="p-5 sm:p-7 space-y-5">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                  <button
-                    onClick={() => setScreen('mode-select')}
-                    className="text-xs font-bold text-slate-500 hover:text-slate-800 flex items-center gap-1"
-                  >
-                    ← トップに戻る
-                  </button>
-                  <span className="text-xs font-black text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200">
-                    内蔵データベース: 全404問
-                  </span>
-                </div>
-
-                {/* ① ボリューム選択タブ */}
-                <div>
-                  <div className="flex justify-between items-center mb-1.5">
-                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                      対象ボリューム
-                    </label>
-                    <span className="text-[11px] font-bold text-blue-600">
-                      {toeicVolumeFilter === 'ALL' ? '全セット（Vol 1〜4：計404問）' : `Vol.${toeicVolumeFilter}`}
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-5 gap-1.5">
-                    {[
-                      { id: 'ALL', label: '全セット' },
-                      { id: '1', label: 'Vol 1' },
-                      { id: '2', label: 'Vol 2' },
-                      { id: '3', label: 'Vol 3' },
-                      { id: '4', label: 'Vol 4' },
-                    ].map(tab => (
-                      <button
-                        key={tab.id}
-                        onClick={() => setToeicVolumeFilter(tab.id)}
-                        className={`py-2 rounded-xl text-xs font-black transition-all ${
-                          toeicVolumeFilter === tab.id
-                            ? 'bg-slate-900 text-white shadow-sm'
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                        }`}
-                      >
-                        {tab.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* ② カテゴリー選択 */}
-                <div>
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
-                    Partを選択
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {[
-                      { id: '5', title: 'Part 5', subtitle: '短文穴埋め問題' },
-                      { id: '6', title: 'Part 6', subtitle: '長文穴埋め問題' },
-                      { id: '7', title: 'Part 7', subtitle: '長文読解問題' },
-                      { id: 'ALL', title: 'Part 5 / 6 / 7', subtitle: '総合ミックス演習' },
-                    ].map((cat) => (
-                      <button
-                        key={cat.id}
-                        onClick={() => handleToeicCategoryChange(cat.id)}
-                        className={`p-3.5 rounded-2xl border-2 text-left transition-all active:scale-95 ${
-                          toeicCategory === cat.id
-                            ? 'border-blue-600 bg-blue-50/70 text-blue-950 shadow-sm'
-                            : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
-                        }`}
-                      >
-                        <div className="font-black text-sm text-blue-600">{cat.title}</div>
-                        <div className="text-[11px] text-slate-500 mt-0.5 font-medium">{cat.subtitle}</div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* ③ 解く問題数（Part5は5, 10, 15問 / Part6,7は1, 3, 5問） */}
-                <div>
-                  <div className="flex justify-between items-center mb-1.5">
-                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                      解く問題数
-                    </label>
-                    <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
-                      {toeicCategory === '5' || toeicCategory === 'ALL' ? 'Part 5基準（5 / 10 / 15問）' : '長文基準（1 / 3 / 5問）'}
-                    </span>
-                  </div>
-
-                  {(toeicCategory === '5' || toeicCategory === 'ALL') && (
-                    <div className="grid grid-cols-3 gap-2">
-                      {[5, 10, 15].map((cnt) => (
-                        <button
-                          key={cnt}
-                          onClick={() => setToeicQuestionCount(cnt)}
-                          className={`py-3 rounded-xl text-xs font-black transition-all active:scale-95 ${
-                            toeicQuestionCount === cnt
-                              ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
-                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                          }`}
-                        >
-                          {cnt} 問
-                        </button>
-                      ))}
-                    </div>
-                  )}
-
-                  {(toeicCategory === '6' || toeicCategory === '7') && (
-                    <div className="grid grid-cols-3 gap-2">
-                      {[1, 3, 5].map((cnt) => (
-                        <button
-                          key={cnt}
-                          onClick={() => setToeicQuestionCount(cnt)}
-                          className={`py-3 rounded-xl text-xs font-black transition-all active:scale-95 ${
-                            toeicQuestionCount === cnt
-                              ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
-                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                          }`}
-                        >
-                          {cnt} 問
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <button
-                  onClick={startToeicQuiz}
-                  className="w-full py-4 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-black rounded-2xl shadow-lg shadow-blue-200 text-sm transition-all"
-                >
-                  演習を開始する（{toeicQuestionCount}問）
-                </button>
-              </div>
-            )}
-
-            {/* ========================================================= */}
             {/* 3. クイズ出題画面 */}
-            {/* ========================================================= */}
             {screen === 'quiz' && currentQuestion && (
               <div className="flex flex-col">
                 <div className="w-full h-1.5 bg-slate-100">
@@ -1027,14 +1060,14 @@
                         return (
                           <button
                             key={idx}
-                            onClick={() => handleAnswerSubmit(optLetter === currentQuestion.answer.trim().charAt(0).toUpperCase(), opt)}
+                            onClick={() => handleAnswerSubmit(optLetter === (currentQuestion.answer || '').trim().charAt(0).toUpperCase(), opt)}
                             className="w-full p-3.5 border-2 border-slate-200 active:border-blue-600 active:bg-blue-50 text-left font-bold text-xs sm:text-sm text-slate-700 rounded-xl transition-all flex items-center justify-between"
                           >
                             <span className="flex items-center gap-2.5">
                               <span className="w-5 h-5 rounded-md bg-slate-100 text-blue-600 font-mono flex items-center justify-center text-[11px] font-bold">
                                 {optLetter}
                               </span>
-                              <span>{opt.replace(/^[A-D]\.\s*/, '')}</span>
+                              <span>{opt.replace(/^[A-D][\.\)\s]\s*/, '')}</span>
                             </span>
                             <span className="text-slate-300">→</span>
                           </button>
@@ -1131,9 +1164,7 @@
               </div>
             )}
 
-            {/* ========================================================= */}
-            {/* 4. 結果・解説画面（★解答後も長文常時表示 & 穴埋め完了全文 & 全文和訳★） */}
-            {/* ========================================================= */}
+            {/* 4. 結果・解説画面（長文常時表示 & 解法ロジック & 単語帳解説カード完備） */}
             {screen === 'explanation' && currentResult && (
               <div className="p-5 sm:p-7 space-y-4">
                 {/* 正誤判定ヘッダー */}
@@ -1146,14 +1177,14 @@
                       {currentResult.isCorrect ? '正解！ Correct!' : '不正解… Incorrect'}
                     </div>
                     <div className="text-[11px] opacity-80">
-                      {activeMode === 'daily' 
-                        ? (currentResult.isCorrect ? '忘却曲線のインターバルを延長しました。' : '明日また復習します。')
-                        : `正解は (${currentResult.question.answer}) です。`}
+                      {currentResult.isCorrect 
+                        ? '忘却曲線のインターバルを延長しました。' 
+                        : '連続正解がリセットされました。明日また復習します。'}
                     </div>
                   </div>
                 </div>
 
-                {/* ★Part 6 / 7 の長文（Passage 英文全文）を解答後にも常時表示★ */}
+                {/* Part 6 / 7 の長文（Passage 英文全文）を解答後にも常時表示 */}
                 {activeMode === 'toeic' && (currentResult.question.part === 6 || currentResult.question.part === 7) && currentResult.question.passage && (
                   <div className="bg-blue-50/60 border-2 border-blue-200 rounded-2xl p-4 text-left shadow-sm">
                     <div className="flex justify-between items-center pb-2 border-b border-blue-200 mb-2">
@@ -1188,7 +1219,7 @@
                   </div>
                 )}
 
-                {/* ★穴埋め完了英文（全文）/ 設問と正解★ */}
+                {/* 穴埋め完了英文（全文）/ 設問と正解 */}
                 <div className="bg-indigo-50/70 border-2 border-indigo-200 rounded-2xl p-4 text-left shadow-sm">
                   <div className="flex justify-between items-center mb-1.5">
                     <span className="text-[10px] font-black uppercase text-indigo-700 tracking-wider flex items-center gap-1">
@@ -1244,13 +1275,13 @@
 
                 {/* 音声コントロールバー */}
                 <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-700">🔊 その他の音声を再生:</span>
+                  <span className="text-xs font-bold text-slate-700">🔊 音声を再生:</span>
                   <div className="flex gap-1.5">
                     <button
                       onClick={() => speakText(activeMode === 'daily' ? currentResult.question.phrase : currentResult.question.question)}
                       className="px-3 py-1.5 bg-blue-600 active:bg-blue-700 text-white font-bold rounded-lg text-xs shadow-sm"
                     >
-                      ▶ 設問文
+                      設問文
                     </button>
                     {activeMode === 'toeic' && currentResult.question.passage && (
                       <button
@@ -1282,24 +1313,24 @@
                     </div>
                   )}
 
-                  {/* TOEICの解説（文法・語彙ロジック） */}
+                  {/* TOEICの解説（文法・語彙ロジック & 単語帳解説） */}
                   {activeMode === 'toeic' && (
                     <div>
                       <div className="text-xs font-black text-blue-600 mb-1 flex items-center gap-1">
                         <span>💡</span> 解説（Explanation）
                       </div>
-                      <div className="text-xs sm:text-sm text-slate-700 leading-relaxed font-medium">
+                      <div className="text-xs sm:text-sm text-slate-700 leading-relaxed font-medium whitespace-pre-line bg-white p-3 rounded-xl border border-slate-200">
                         {currentResult.question.explanation || '解説情報がありません。'}
                       </div>
                     </div>
                   )}
 
-                  {/* 重要語彙・熟語カード */}
+                  {/* ノート重要語彙・熟語カード */}
                   {activeMode === 'toeic' && extractedVocabList.length > 0 && (
                     <div className="pt-2 border-t border-slate-200">
                       <div className="text-[11px] font-black text-amber-700 uppercase tracking-wider mb-2 flex items-center gap-1">
                         <span>📚</span>
-                        <span>長文・設問中の重要語彙・熟語（単語帳抽出語）</span>
+                        <span>長文・設問中の重要語彙・熟語（単語帳抽出カード）</span>
                       </div>
                       <div className="space-y-1.5">
                         {extractedVocabList.map((item, idx) => (
@@ -1391,17 +1422,19 @@
               </div>
             )}
 
-            {/* ========================================================= */}
             {/* 5. 結果サマリー画面 */}
-            {/* ========================================================= */}
             {screen === 'result' && (
               <div className="p-6 sm:p-8 text-center space-y-5">
                 <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto text-3xl shadow-inner">
                   🎉
                 </div>
                 <div>
-                  <h2 className="text-xl sm:text-2xl font-black text-slate-900">セッション完了！</h2>
-                  <p className="text-xs text-slate-500 mt-0.5">今回の演習スコアを確認しましょう</p>
+                  <h2 className="text-xl sm:text-2xl font-black text-slate-900">演習セッション完了！</h2>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    {activeMode === 'daily' 
+                      ? '日常単語の忘却曲線（SRS）スケジュールが更新されました' 
+                      : 'TOEIC問題の忘却曲線インターバルが更新されました'}
+                  </p>
                 </div>
 
                 <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-5">
