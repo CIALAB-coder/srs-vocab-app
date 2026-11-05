@@ -243,15 +243,150 @@
     // 4. データベースビルダー関数群（エラー修正完了）
     // ==========================================
 
-    // Part 5 データベース（200問）
+    // Part 5 データベース（200問：英文全文訳・選択肢訳・詳細解説完備）
     function buildPart5Database() {
       const p5Items = [];
       const part5Templates = [
-        { q: "To ensure the safety of all assembly line workers, the plant manager has made it ------- to wear protective headgear at all times.", opts: ["A. mandate", "B. mandatory", "C. mandating", "D. mandatorily"], a: "B", exp: "【品詞問題】 make it (形容詞) to do の構文です。目的格補語として形容詞が必要であるため、(B) mandatory が正解です。\n\n【重要語彙】 mandatory: 義務的な、必須の" },
-        { q: "The regional sales director plans to ------- the quarterly budget among the three newly opened branches in Southeast Asia.", opts: ["A. allocate", "B. allocation", "C. allocating", "D. allocates"], a: "A", exp: "【品詞問題】 plan to do の不定詞構文であるため、to の後には動詞の原形が入ります。したがって (A) allocate が正解です。\n\n【重要語彙】 allocate: 配分する、割り当てる" },
-        { q: "Despite the economic downturn, the luxury automotive brand experienced a ------- increase in its overseas revenue last year.", opts: ["A. signify", "B. significantly", "C. significant", "D. significance"], a: "C", exp: "【品詞問題】 名詞 increase を前から修飾する形容詞が必要です。したがって (C) significant が正解です。\n\n【重要語彙】 significant: 大幅な、かなりの" },
-        { q: "Before submitting your final draft to the editor, please review the document ------- to eliminate any grammatical errors.", opts: ["A. thorough", "B. thoroughly", "C. thoroughness", "D. thoroughgoing"], a: "B", exp: "【品詞問題】 動詞 review の動作の程度を修飾する副詞が入る位置です。したがって (B) thoroughly が正解です。\n\n【重要語彙】 thoroughly: 徹底的に、几帳面に" },
-        { q: "Due to unexpected ------- technical challenges during installation, the project completion date was postponed by two weeks.", opts: ["A. unforeseen", "B. foresee", "C. foreseeably", "D. foresight"], a: "A", exp: "【品詞問題】 名詞句 technical challenges を修飾する形容詞が入る位置です。したがって (A) unforeseen が正解です。\n\n【重要語彙】 unforeseen: 不測の、予期しない" }
+        {
+          q: "To encourage early online registration for the annual management summit, the conference organizers agreed to ------- the processing fee for all attendees who sign up before May 15.",
+          opts: ["A. waive", "B. waives", "C. waiving", "D. waiver"],
+          a: "A",
+          trans: "【全文訳】年次経営サミットへの早期オンライン登録を促進するため、会議の主催者らは5月15日より前に申し込んだすべての出席者の手数料を免除することに合意した。\n【選択肢訳】(A) 免除する（動詞原形） / (B) 免除する（三単現） / (C) 免除すること（動名詞） / (D) 免除（名詞）",
+          exp: "【品詞・不定詞構文問題】 agree to do（〜することに合意する）の構文です。to の直後には目的語 the processing fee（手数料）を取る動詞の原形が必要です。したがって (A) waive が正解です。\n\n【重要語彙】 waive: （手数料・要件などを）免除する、放棄する"
+        },
+        {
+          q: "To ensure the safety of all assembly line workers, the plant manager has made it ------- to wear protective headgear at all times.",
+          opts: ["A. mandate", "B. mandatory", "C. mandating", "D. mandatorily"],
+          a: "B",
+          trans: "【全文訳】すべての組立ライン作業員の安全を確保するため、工場長は常に保護帽（ヘルメット）を着用することを義務付けた。\n【選択肢訳】(A) 命じる（動詞） / (B) 義務的な、必須の（形容詞） / (C) 命じること（分詞） / (D) 義務的に（副詞）",
+          exp: "【品詞問題】 make it (形容詞) to do の構文です。目的格補語として形容詞が必要であるため、(B) mandatory が正解です。\n\n【重要語彙】 mandatory: 義務的な、必須の（= required / compulsory）"
+        },
+        {
+          q: "Due to unexpected ------- technical challenges during installation, the project completion date was postponed by two weeks.",
+          opts: ["A. unforeseen", "B. foresee", "C. foreseeably", "D. foresight"],
+          a: "A",
+          trans: "【全文訳】設置工事中の予期せぬ技術的課題のため、プロジェクトの完了予定日は2週間延期された。\n【選択肢訳】(A) 予期しない、不測の（形容詞） / (B) 予見する（動詞） / (C) 予測通りに（副詞） / (D) 先見の明（名詞）",
+          exp: "【品詞問題】 名詞句 technical challenges を前から修飾する形容詞が入る位置です。したがって (A) unforeseen が正解です。\n\n【重要語彙】 unforeseen: 予期しない、不測の（unforeseen circumstances で頻出）"
+        },
+        {
+          q: "The regional sales director plans to ------- the quarterly budget among the three newly opened branches in Southeast Asia.",
+          opts: ["A. allocate", "B. allocation", "C. allocating", "D. allocates"],
+          a: "A",
+          trans: "【全文訳】地域営業本部長は、東南アジアに新設された3つの支店の間で四半期予算を配分する計画である。\n【選択肢訳】(A) 配分する（動詞原形） / (B) 配分（名詞） / (C) 配分すること（分詞） / (D) 配分する（三単現）",
+          exp: "【品詞問題】 plan to do の不定詞構文であるため、to の後には動詞の原形が入ります。したがって (A) allocate が正解です。\n\n【重要語彙】 allocate: 配分する、割り当てる"
+        },
+        {
+          q: "Despite the economic downturn, the luxury automotive brand experienced a ------- increase in its overseas revenue last year.",
+          opts: ["A. signify", "B. significantly", "C. significant", "D. significance"],
+          a: "C",
+          trans: "【全文訳】景気低迷にもかかわらず、その高級車ブランドは昨年、海外売上高の大幅な増加を記録した。\n【選択肢訳】(A) 意味する（動詞） / (B) 著しく（副詞） / (C) 著しい、大幅な（形容詞） / (D) 重要性（名詞）",
+          exp: "【品詞問題】 名詞 increase を前から修飾する形容詞が必要です。したがって (C) significant が正解です。\n\n【重要語彙】 significant: 著しい、大幅な（= substantial）"
+        },
+        {
+          q: "Before submitting your final draft to the editor, please review the document ------- to eliminate any grammatical errors.",
+          opts: ["A. thorough", "B. thoroughly", "C. thoroughness", "D. thoroughgoing"],
+          a: "B",
+          trans: "【全文訳】編集者に最終稿を提出する前に、文法的な誤りをなくすため、書類を徹底的に見直してください。\n【選択肢訳】(A) 徹底的な（形容詞） / (B) 徹底的に、几帳面に（副詞） / (C) 徹底（名詞） / (D) 完全な（形容詞）",
+          exp: "【品詞問題】 他動詞 review の動作様態を修飾する副詞が入る位置です。したがって (B) thoroughly が正解です。\n\n【重要語彙】 thoroughly: 徹底的に、几帳面に（review thoroughly で頻出）"
+        },
+        {
+          q: "The human resources director emphasized that fostering cultural ------- within project teams leads to higher creativity and better problem-solving.",
+          opts: ["A. diverse", "B. diversity", "C. diversify", "D. diversely"],
+          a: "B",
+          trans: "【全文訳】人事部長は、プロジェクトチーム内で文化的多様性を育むことが、より高い創造性と優れた問題解決につながると強調した。\n【選択肢訳】(A) 多様な（形容詞） / (B) 多様性（名詞） / (C) 多角化する（動詞） / (D) 多様に（副詞）",
+          exp: "【品詞問題】 他動詞 fostering の目的語となり、形容詞 cultural に修飾される名詞が入る位置です。したがって (B) diversity が正解です。\n\n【重要語彙】 diversity: 多様性（cultural / workplace diversity で頻出）"
+        },
+        {
+          q: "The introduction of automated invoice reconciliation software has made the verification process ------- faster and less prone to clerical error.",
+          opts: ["A. consider", "B. considerable", "C. considerably", "D. consideration"],
+          a: "C",
+          trans: "【全文訳】自動請求照合ソフトウェアの導入により、検証プロセスははるかに迅速になり、事務処理の誤りが発生しにくくなった。\n【選択肢訳】(A) 考慮する（動詞） / (B) かなりの（形容詞） / (C) かなり、はるかに（副詞） / (D) 考慮（名詞）",
+          exp: "【品詞・比較級修飾問題】 比較級形容詞 faster を前から修飾して「はるかに、かなり」と強調する副詞が入る位置です。したがって (C) considerably が正解です。\n\n【重要語彙】 considerably: かなり、相当に、はるかに（= significantly / much）"
+        },
+        {
+          q: "After three rounds of intensive negotiations, representatives from both sides finally reached a ------- on the terms of the new agreement.",
+          opts: ["A. consensual", "B. consensus", "C. consent", "D. consenting"],
+          a: "B",
+          trans: "【全文訳】3回にわたる集中的な交渉の末、双方の代表者は新しい協約の条件に関して最終的に合意に達した。\n【選択肢訳】(A) 合意に基づく（形容詞） / (B) 合意、総意（名詞） / (C) 同意（不可算名詞） / (D) 同意している（分詞）",
+          exp: "【品詞・コロケーション問題】 不定冠詞 a の後ろで他動詞 reached の目的語となる名詞が入ります。reach a consensus on 〜（〜に関して合意に達する）を形成する (B) consensus が正解です。\n\n【重要語彙】 consensus: 合意、総意、意見の一致"
+        },
+        {
+          q: "Under federal securities regulations, publicly traded corporations are legally required to ------- all material financial information to shareholders.",
+          opts: ["A. disclose", "B. disclosure", "C. disclosed", "D. disclosing"],
+          a: "A",
+          trans: "【全文訳】連邦証券取引規制の下で、上場企業はすべての重要な財務情報を株主に対して開示することが法的に義務付けられている。\n【選択肢訳】(A) 開示する、公表する（動詞原形） / (B) 開示（名詞） / (C) 開示した（過去分詞） / (D) 開示すること（動名詞）",
+          exp: "【品詞問題】 be required to do の構文であり、目的語 all material financial information を取る動詞の原形が必要です。したがって (A) disclose が正解です。\n\n【重要語彙】 disclose: 開示する、公表する（名詞形 disclosure）"
+        },
+        {
+          q: "Retail employees are instructed to arrange all promotional merchandise ------- on display tables to ensure an attractive shopping environment.",
+          opts: ["A. neat", "B. neatly", "C. neatness", "D. neater"],
+          a: "B",
+          trans: "【全文訳】小売店の従業員は、魅力的な買い物環境を確保するため、すべての販促商品を陳列テーブルの上に整然と並べるよう指示されている。\n【選択肢訳】(A) きちんとした（形容詞） / (B) きちんと、整然と（副詞） / (C) 整然さ（名詞） / (D) より整然とした（比較級）",
+          exp: "【品詞問題】 他動詞 arrange の動作様態を修飾する副詞が入る位置です。したがって (B) neatly が正解です。\n\n【重要語彙】 neatly: きちんと、整然と（arrange neatly で頻出）"
+        },
+        {
+          q: "Department directors are held directly ------- for any budgetary deficits resulting from unapproved departmental entertainment expenditures.",
+          opts: ["A. accountability", "B. accountable", "C. account", "D. accountably"],
+          a: "B",
+          trans: "【全文訳】部門長らは、未承認の部門接待費に起因するいかなる予算赤字に対しても、直接的な説明責任を負わされる。\n【選択肢訳】(A) 説明責任（名詞） / (B) 説明責任がある（形容詞） / (C) 口座、説明（名詞） / (D) 責任を持って（副詞）",
+          exp: "【品詞・構文問題】 be held accountable for 〜（〜に対して責任を負う）の受動態構文です。補語となる形容詞が必要であるため、(B) accountable が正解です。\n\n【重要語彙】 accountable: 説明責任がある、責任を負うべき"
+        },
+        {
+          q: "The municipal transportation department invited qualified commercial ------- to submit their formal proposals for the highway expansion project.",
+          opts: ["A. bid", "B. bidding", "C. bidders", "D. biddable"],
+          a: "C",
+          trans: "【全文訳】市交通局は、高速道路拡張プロジェクトに対する正式な提案書を提出するよう、資格を持つ商業入札業者に呼びかけた。\n【選択肢訳】(A) 入札する（動詞） / (B) 入札（名詞） / (C) 入札者、応札業者（名詞複数形） / (D) 従順な（形容詞）",
+          exp: "【語彙・意味判別問題】 提案書を提出する主体（人・業者）を表す名詞の複数形が必要です。したがって入札者を意味する (C) bidders が正解です。\n\n【重要語彙】 bidder: 入札者、応札業者（動詞・名詞 bid）"
+        },
+        {
+          q: "------- initial financial forecasts predicting a severe downturn in quarterly revenue, the retail chain experienced a robust increase in overseas sales.",
+          opts: ["A. Contrary to", "B. In addition to", "C. Due to", "D. Prior to"],
+          a: "A",
+          trans: "【全文訳】四半期収益の深刻な低迷を予測していた当初の財務予測に反して、その小売チェーンは海外売上高において力強い増加を経験した。\n【選択肢訳】(A) 〜に反して（前置詞句） / (B) 〜に加えて（前置詞句） / (C) 〜が原因で（前置詞句） / (D) 〜より前に（前置詞句）",
+          exp: "【前置詞句・文脈対比問題】 後続の名詞句（低迷の予測）と主節（売上増加）が逆接・対比関係にあるため、「〜に反して」を意味する (A) Contrary to が正解です。\n\n【重要語彙】 contrary to: 〜に反して、〜とは反対に"
+        },
+        {
+          q: "The commercial property developer secured a municipal permit to ------- the abandoned textile mill and build a multi-purpose retail complex.",
+          opts: ["A. demolish", "B. demolition", "C. demolished", "D. demolishing"],
+          a: "A",
+          trans: "【全文訳】その商業不動産開発業者は、放置された紡績工場を取り壊し、多目的商業施設を建設するための市の許可を取得した。\n【選択肢訳】(A) 取り壊す、解体する（動詞原形） / (B) 解体（名詞） / (C) 取り壊した（過去分詞） / (D) 解体すること（動名詞）",
+          exp: "【品詞・不定詞並列問題】 不定詞 to の直後にあり、and build と並列して目的語を取る動詞の原形が必要です。したがって (A) demolish が正解です。\n\n【重要語彙】 demolish: 取り壊す、解体する（名詞形 demolition）"
+        },
+        {
+          q: "Customer support specialists are trained to listen ------- to user complaints before offering step-by-step technical troubleshooting advice.",
+          opts: ["A. patient", "B. patience", "C. patiently", "D. patientness"],
+          a: "C",
+          trans: "【全文訳】カスタマーサポートスペシャリストは、段階的な技術サポートの助言を提供する前に、ユーザーの苦情に辛抱強く耳を傾けるよう訓練されている。\n【選択肢訳】(A) 辛抱強い（形容詞） / (B) 忍耐（名詞） / (C) 辛抱強く、根気よく（副詞） / (D) 不成立",
+          exp: "【品詞問題】 自動詞 listen を修飾する副詞が入る位置です。したがって (C) patiently が正解です。\n\n【重要語彙】 patiently: 辛抱強く、根気よく（形容詞 patient, 名詞 patience）"
+        },
+        {
+          q: "The external compliance auditor flagged several expense reports as ------- because they lacked valid receipts and detailed merchant descriptions.",
+          opts: ["A. question", "B. questionable", "C. questionably", "D. questioned"],
+          a: "B",
+          trans: "【全文訳】外部コンプライアンス監査人は、有効な領収書と詳細な取引業者の記述が欠けていたため、いくつかの経費報告書を疑わしいものとして指摘した。\n【選択肢訳】(A) 質問（名詞） / (B) 疑わしい、疑問の余地がある（形容詞） / (C) 疑わしく（副詞） / (D) 質問された（過去分詞）",
+          exp: "【品詞問題】 flag A as B（AをBとして目印を付ける）の構文で、前置詞 as の後ろで補語となる形容詞が入る位置です。したがって (B) questionable が正解です。\n\n【重要語彙】 questionable: 疑わしい、疑問の余地がある（= doubtful）"
+        },
+        {
+          q: "To maintain smooth production across the assembly plant, the inventory supervisor was instructed to ------- the stock of semiconductor chips before the shift began.",
+          opts: ["A. replenish", "B. replenishment", "C. replenished", "D. replenishing"],
+          a: "A",
+          trans: "【全文訳】組立工場全体での円滑な生産を維持するため、在庫管理者はシフトが始まる前に半導体チップの在庫を補充するよう指示された。\n【選択肢訳】(A) 補充する（動詞原形） / (B) 補充（名詞） / (C) 補充した（過去分詞） / (D) 補充すること（動名詞）",
+          exp: "【品詞・不定詞問題】 be instructed to do（〜するよう指示される）の構文であり、目的語 the stock を取る動詞の原形が必要です。したがって (A) replenish が正解です。\n\n【重要語彙】 replenish: 補充する（replenish stock / supplies で頻出）"
+        },
+        {
+          q: "The quarterly market analysis report provides valuable ------- into changing consumer preferences across several emerging Southeast Asian economies.",
+          opts: ["A. insightful", "B. insightfully", "C. insights", "D. insightfulness"],
+          a: "C",
+          trans: "【全文訳】その四半期市場分析報告書は、いくつかの新興東南アジア経済における変化する消費者の嗜好に関する貴重な洞察（知見）を提供している。\n【選択肢訳】(A) 洞察力のある（形容詞） / (B) 洞察力をもって（副詞） / (C) 洞察、知見（名詞複数形） / (D) 洞察の深さ（名詞）",
+          exp: "【品詞・コロケーション問題】 他動詞 provides の目的語となり、前置詞 into と結びつく名詞が入ります。provide insights into 〜（〜に対する洞察・知見を提供する）を形成する (C) insights が正解です。\n\n【重要語彙】 insight: 洞察、見識、知見（形容詞 insightful）"
+        },
+        {
+          q: "Wholesale commercial distributors that purchase office paper in large ------- are entitled to receive preferential volume discounts and free freight shipping.",
+          opts: ["A. quantitate", "B. quantities", "C. quantitative", "D. quantitatively"],
+          a: "B",
+          trans: "【全文訳】コピー用紙を大量に購入する卸売商業販売業者は、優遇数量割引と無料貨物輸送を受ける権利がある。\n【選択肢訳】(A) 定量化する（動詞） / (B) 数量、分量（名詞複数形） / (C) 数量的な（形容詞） / (D) 数量的に（副詞）",
+          exp: "【品詞・成句問題】 in large quantities（大量に、大口で）という調達・購買トピックの定番成句を形成する名詞の複数形が入ります。したがって (B) quantities が正解です。\n\n【重要語彙】 in large quantities: 大量に、大口で"
+        }
       ];
 
       for (let v = 1; v <= 4; v++) {
@@ -266,7 +401,7 @@
             question: tpl.q,
             options: tpl.opts,
             answer: tpl.a,
-            translation: `【設問訳】文脈に適した語を選びなさい。\n正解は (${tpl.a}) です。`,
+            translation: tpl.trans,
             explanation: tpl.exp
           });
         }
